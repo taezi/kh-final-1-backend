@@ -58,8 +58,9 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setMaxAge((int)(jwt.getRefreshTokenExpirationMs()/1000));
         res.addCookie(cookie);
+        System.out.println(user);
 
-        return ResponseEntity.ok(new JwtResponse(access, refresh, "Bearer"));
+        return ResponseEntity.ok(new JwtResponse(access, refresh, "Bearer", user));
     }
 
     /** Access 만료 시 호출: 쿠키의 refreshToken으로 Access 재발급 */
@@ -76,9 +77,11 @@ public class AuthController {
         String id = jwt.getUseridFromToken(refresh);
         MemberDTO user = userService.findByid(Long.parseLong(id));
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        System.out.println(user);
+
 
         String newAccess = jwt.generateAccessToken(user);
-        return ResponseEntity.ok(new JwtResponse(newAccess, null, "Bearer"));
+        return ResponseEntity.ok(new JwtResponse(newAccess, null, "Bearer", user));
     }
 
     @PostMapping("/logout")
