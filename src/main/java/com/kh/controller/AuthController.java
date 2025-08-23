@@ -76,8 +76,8 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String id = jwt.getUseridFromToken(refresh);
-        MemberDTO user = userService.findByid(Long.parseLong(id));
+        String userno = jwt.getUseridFromToken(refresh);
+        MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         System.out.println(user);
 
@@ -100,9 +100,9 @@ public class AuthController {
     /** 보호된 API: 필터가 넣어준 attribute 사용 */
     @GetMapping("/user-data")
     public ResponseEntity<MemberDTO> getUserData(HttpServletRequest req){
-        String id = (String) req.getAttribute("authenticatedUserid");
-        if (id == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        MemberDTO user = userService.findByid(Long.parseLong(id));
+        String userno = (String) req.getAttribute("authenticatedUserid");
+        if (userno == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return ResponseEntity.ok(user);
     }
