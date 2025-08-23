@@ -11,6 +11,8 @@ public class AuthRequest {
     private String userid;
     @NotBlank(message = "비밀번호는 비워둘 수 없습니다.")
     private String password;
+    private String username;
+    private String nickname;
+    private String email;
 
-    private String username;//선택사항
 }
