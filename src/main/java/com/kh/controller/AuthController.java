@@ -41,6 +41,7 @@ public class AuthController {
         user.setEmail(req.getEmail());
         user.setNickname(req.getNickname());
         userService.registerUser(user);
+        System.out.println(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("사용자가 정상적으로 등록되었습니다.");
     }
 
