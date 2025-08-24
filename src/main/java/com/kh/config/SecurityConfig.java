@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/board/list", "/api/board/detail", "/api/board/download",
+                        .requestMatchers( "/api/board/detail", "/api/board/download",
                                 "/api/board/comment/list").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -27,7 +27,7 @@ public class JwtTokenProvider {
     public String generateAccessToken(MemberDTO user) {
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(String.valueOf(user.getId()))
+                .setSubject(String.valueOf(user.getUserno()))
                 .claim("roles", user.getRole())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessMs))
@@ -38,7 +38,7 @@ public class JwtTokenProvider {
     public String generateRefreshToken(MemberDTO user) {
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(String.valueOf(user.getId()))
+                .setSubject(String.valueOf(user.getUserno()))
                 .claim("roles", user.getRole())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshMs))
