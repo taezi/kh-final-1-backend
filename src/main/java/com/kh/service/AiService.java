@@ -29,6 +29,8 @@ public class AiService {
                     prompt,
                     null
             );
+            System.out.println(response);
+            System.out.println(response.text());
             return response.text();
         } catch (Exception e) {
             e.printStackTrace();

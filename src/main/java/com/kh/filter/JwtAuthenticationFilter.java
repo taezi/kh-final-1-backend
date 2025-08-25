@@ -23,7 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh"
+            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place/**"
     );
 
     @Override
