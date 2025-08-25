@@ -9,5 +9,5 @@ public interface UserMapper {
 
     void registerUser(MemberDTO user);
 
-    MemberDTO findByid(long id);
+    MemberDTO findByid(long userno);
 }

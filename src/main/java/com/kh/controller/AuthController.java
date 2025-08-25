@@ -37,8 +37,11 @@ public class AuthController {
         user.setUserid(req.getUserid());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setUsername(req.getUsername());
-        user.setRole("ROLE_USER");
+        user.setRole("user");
+        user.setEmail(req.getEmail());
+        user.setNickname(req.getNickname());
         userService.registerUser(user);
+        System.out.println(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("사용자가 정상적으로 등록되었습니다.");
     }
 
@@ -58,8 +61,9 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setMaxAge((int)(jwt.getRefreshTokenExpirationMs()/1000));
         res.addCookie(cookie);
+        System.out.println(user);
 
-        return ResponseEntity.ok(new JwtResponse(access, refresh, "Bearer"));
+        return ResponseEntity.ok(new JwtResponse(access, refresh, "Bearer", user));
     }
 
     /** Access 만료 시 호출: 쿠키의 refreshToken으로 Access 재발급 */
@@ -73,12 +77,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String id = jwt.getUseridFromToken(refresh);
-        MemberDTO user = userService.findByid(Long.parseLong(id));
+        String userno = jwt.getUseridFromToken(refresh);
+        MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        System.out.println(user);
+
 
         String newAccess = jwt.generateAccessToken(user);
-        return ResponseEntity.ok(new JwtResponse(newAccess, null, "Bearer"));
+        return ResponseEntity.ok(new JwtResponse(newAccess, null, "Bearer", user));
     }
 
     @PostMapping("/logout")
@@ -95,9 +101,9 @@ public class AuthController {
     /** 보호된 API: 필터가 넣어준 attribute 사용 */
     @GetMapping("/user-data")
     public ResponseEntity<MemberDTO> getUserData(HttpServletRequest req){
-        String id = (String) req.getAttribute("authenticatedUserid");
-        if (id == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        MemberDTO user = userService.findByid(Long.parseLong(id));
+        String userno = (String) req.getAttribute("authenticatedUserid");
+        if (userno == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return ResponseEntity.ok(user);
     }

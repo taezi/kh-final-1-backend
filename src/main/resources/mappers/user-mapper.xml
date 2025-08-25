@@ -9,11 +9,11 @@
     </select>
     <select id="findByid" resultType="member">
         select * from member
-        where id = #{id}
+        where userno = #{userno}
     </select>
     <!-- 트리거로 id 값 자동 생성   -->
     <insert id="registerUser">
-        insert into member(userid,username,password,role)
-        values(#{userid},#{username},#{password},#{role})
+        insert into member(userid,username,password,email,nickname,role)
+        values(#{userid},#{username},#{password},#{email},#{nickname},#{role})
     </insert>
 </mapper>

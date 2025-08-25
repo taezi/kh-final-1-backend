@@ -18,7 +18,7 @@ public class UserService {
         userMapper.registerUser(user);
     }
 
-    public MemberDTO findByid(long id) {
-        return userMapper.findByid(id);
+    public MemberDTO findByid(long userno) {
+        return userMapper.findByid(userno);
     }
 }

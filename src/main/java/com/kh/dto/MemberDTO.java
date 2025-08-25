@@ -11,9 +11,13 @@ import org.apache.ibatis.type.Alias;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberDTO {
-    private Long id;
+    private Long userno;
     private String userid;
     private String username;
     private String password;
+    private String email;
+    private String nickname;
+    private String joindate;
     private String role;
+    //12
 }
