@@ -1,3 +1,4 @@
+package com.kh.controller;
 import com.kh.dto.EditorDTO;
 import com.kh.mapper.EditorMapper;
 import org.springframework.beans.factory.annotation.Autowired;
