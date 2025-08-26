@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kh.mapper.RestMapper">
+
+    <!-- RestDto의 모든 컬럼을 매핑하는 ResultMap -->
+    <resultMap id="RestResultMap" type="com.kh.dto.RestDto">
+        <id property="restNo" column="RESTNO" />
+        <result property="restName" column="RESTNAME" />
+        <result property="restBranch" column="RESTBRANCH" />
+        <result property="restRegion" column="RESTREGION" />
+        <result property="restImgAddress" column="RESTIMGADDRESS" />
+        <result property="restType" column="RESTTYPE" />
+        <result property="restOpen" column="RESTOPEN" />
+        <result property="restPhonNumber" column="RESTPHONNUMBER" />
+        <result property="restAddress" column="RESTADDRESS" />
+        <result property="restRating" column="RESTRATING" />
+        <result property="restSummary" column="RESTSUMMARY" />
+        <result property="restWebsite" column="RESTWEBSITE" />
+        <result property="restMapUrl" column="RESTMAPURL" />
+    </resultMap>
+
+    <!-- 모든 식당 정보를 조회하는 쿼리 -->
+    <select id="findAllRests" resultMap="RestResultMap">
+        SELECT * FROM REST
+    </select>
+
+    <!-- 특정 식당의 상세 정보를 조회하는 쿼리 -->
+    <select id="findRestByName" resultMap="RestResultMap">
+        SELECT * FROM REST WHERE RESTNAME = #{restName}
+    </select>
+
+    <!-- 식당 정보를 업데이트하는 쿼리 -->
+    <update id="updateRestDetails" parameterType="com.kh.dto.RestDto">
+        UPDATE REST
+        SET
+        RESTIMGADDRESS = #{restImgAddress},
+        RESTTYPE = #{restType},
+        RESTOPEN = #{restOpen},
+        RESTPHONNUMBER = #{restPhonNumber},
+        RESTADDRESS = #{restAddress},
+        RESTRATING = #{restRating},
+        RESTSUMMARY = #{restSummary},
+        RESTWEBSITE = #{restWebsite},
+        RESTMAPURL = #{restMapUrl}
+        WHERE
+        RESTNAME = #{restName}
+    </update>
+
+</mapper>

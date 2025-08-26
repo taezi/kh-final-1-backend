@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kh.mapper.CafeMapper">
+
+    <!-- Cafe의 모든 컬럼을 매핑하는 ResultMap -->
+    <resultMap id="CafeResultMap" type="com.kh.dto.Cafe">
+        <id property="cafeNo" column="CAFENO" />
+        <result property="cafeName" column="CAFENAME" />
+        <result property="cafeBranch" column="CAFEBRANCH" />
+        <result property="cafeRegion" column="CAFEREGION" />
+        <result property="cafeImgAddress" column="CAFEIMGADDRESS" />
+        <result property="cafeType" column="CAFETYPE" />
+        <result property="cafeOpen" column="CAFEOPEN" />
+        <result property="cafePhonNumber" column="CAFEPHONNUMBER" />
+        <result property="cafeAddress" column="CAFEADDRESS" />
+        <result property="cafeRating" column="CAFERATING" />
+        <result property="cafeSummary" column="CAFESUMMARY" />
+        <result property="cafeWebsite" column="CAFEWEBSITE" />
+        <result property="cafeMapUrl" column="CAFEMAPURL" />
+    </resultMap>
+
+    <!-- 모든 카페 정보를 조회하는 쿼리 -->
+    <select id="findAllCafes" resultMap="CafeResultMap">
+        SELECT * FROM CAFE
+    </select>
+
+    <!-- 특정 카페의 상세 정보를 조회하는 쿼리 -->
+    <select id="findCafeByName" resultMap="CafeResultMap">
+        SELECT * FROM CAFE WHERE CAFENAME = #{cafeName}
+    </select>
+
+    <!-- 카페 정보를 업데이트하는 쿼리 -->
+    <update id="updateCafeDetails" parameterType="com.kh.dto.Cafe">
+        UPDATE CAFE
+        SET
+        CAFEIMGADDRESS = #{cafeImgAddress},
+        CAFETYPE = #{cafeType},
+        CAFEOPEN = #{cafeOpen},
+        CAFEPHONNUMBER = #{cafePhonNumber},
+        CAFEADDRESS = #{cafeAddress},
+        CAFERATING = #{cafeRating},
+        CAFESUMMARY = #{cafeSummary},
+        CAFEWEBSITE = #{cafeWebsite},
+        CAFEMAPURL = #{cafeMapUrl}
+        WHERE
+        CAFENAME = #{cafeName}
+    </update>
+
+</mapper>

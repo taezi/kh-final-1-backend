@@ -47,6 +47,8 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.json:json:20240303'
 
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 
 
 	// JJWT 0.11.x : api + impl + jackson
