@@ -23,7 +23,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place", "/api/editor"
+            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place",
+            "/api/weather", "/api/editor"
     );
 
     @Override
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // OPTIONS(CORS preflight) 패스
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+
     }
 
     @Override
