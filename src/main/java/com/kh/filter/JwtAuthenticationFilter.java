@@ -24,12 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place",
-            "/api/weather"
+            "/api/weather", "/api/editor"
     );
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
+        System.out.println("shouldNotFilter : "+path);
         // OPTIONS(CORS preflight) 패스
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
@@ -39,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
+        System.out.println(req.getContextPath());
         String auth = req.getHeader("Authorization");
 
         if (auth != null && auth.startsWith("Bearer ")) {
