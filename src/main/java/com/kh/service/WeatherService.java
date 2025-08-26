@@ -1,104 +1,261 @@
 package com.kh.service;
 
+import com.kh.dto.SeoulguDTO;
+import com.kh.mapper.SeoulguMapper;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class WeatherService {
 
     @Value("${weather.api.key}")
     private String serviceKey;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${weather.location.seoul.nx}")
+    private int nx;
 
-    public ResponseEntity<String> getSeoulWeather() {
-        // 날씨 API 호출을 위한 기본 URL
-        String apiUrl = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
+    @Value("${weather.location.seoul.ny}")
+    private int ny;
 
-        // API 갱신 주기에 맞춰 현재 날짜와 시간 설정
-        LocalDateTime now = LocalDateTime.now();
-        String baseDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String baseTime = "0800"; // 예시로 오전 8시를 사용
+    private final SeoulguMapper seoulguMapper;
 
+
+
+
+    // 기상청 base_time은 정해진 8개 값 중 직전 시간 사용
+    private String getBaseTime() {
+        int[] baseTimes = {2300, 2000, 1700, 1400, 1100, 800, 500, 200};
+
+        // 현재 시각
+        int now = LocalTime.now().getHour() * 100 + LocalTime.now().getMinute();
+
+        for (int bt : baseTimes) {
+            if (now >= bt) {
+                return String.format("%04d", bt);
+            }
+        }
+        // 새벽 0시~2시 사이는 전날 23:00 사용
+        return "2300";
+    }
+
+    public String getSeoulWeather() {
         try {
-            // 서비스 키를 URL 인코딩하여 안전하게 사용
-            String encodedServiceKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8);
+            // 오늘 날짜
+            String baseDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String baseTime = getBaseTime();
 
-            // API URL에 파라미터 추가
-            String url = UriComponentsBuilder.fromUriString(apiUrl)
-                    .queryParam("serviceKey", encodedServiceKey) // 인코딩된 키 사용
-                    .queryParam("numOfRows", "50")
-                    .queryParam("pageNo", "1")
-                    .queryParam("dataType", "JSON")
-                    .queryParam("base_date", baseDate)
-                    .queryParam("base_time", baseTime)
-                    .queryParam("nx", "98") // 대구광역시 동구
-                    .queryParam("ny", "76") // 대구광역시 동구
-                    .build()
-                    .toUriString();
+            String apiURL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?";
+            apiURL += "serviceKey=" + serviceKey;
+            apiURL += "&numOfRows=100";
+            apiURL += "&pageNo=1";
+            apiURL += "&dataType=JSON";
+            apiURL += "&base_date=" + baseDate;
+            apiURL += "&base_time=" + baseTime;
+            apiURL += "&nx=" + nx;
+            apiURL += "&ny=" + ny;
+            System.out.println("url : " + apiURL);
 
-            // 외부 API 호출
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            String result = response.getBody();
+            // 1. 요청
+            URL url = new URL(apiURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
 
-            // JSON 파싱 및 원하는 데이터 추출
-            JSONObject json = new JSONObject(result);
-            JSONArray arr = json.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
 
-            // 콘솔에 날씨 정보 출력 (기존 자바 코드의 로직)
-            System.out.println("--- 날씨 정보 ---");
+            if (conn.getResponseCode() != 200) {
+                return "API 호출 실패: " + conn.getResponseCode();
+            }
+
+            // 2. 응답 읽기
+            StringBuilder result = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    result.append(line);
+                }
+            }
+            conn.disconnect();
+
+            // 3. JSON 파싱
+            JSONObject json = new JSONObject(result.toString());
+            JSONArray arr = json.getJSONObject("response")
+                    .getJSONObject("body")
+                    .getJSONObject("items")
+                    .getJSONArray("item");
+
+            JSONObject weather = new JSONObject();
+
             arr.forEach(item -> {
                 JSONObject obj = (JSONObject) item;
-                String category = obj.getString("category");
-                String value = obj.getString("fcstValue");
-
-                switch (category) {
-                    case "TMP":
-                        System.out.println("온도: " + value + "℃");
+                switch (obj.getString("category")) {
+                    case "TMP": // 기온
+                        weather.put("temp", obj.getString("fcstValue"));
                         break;
-                    case "TMX":
-                        System.out.println("최고온도: " + value + "℃");
+                    case "SKY": // 하늘 상태
+                        weather.put("sky", obj.getString("fcstValue"));
                         break;
-                    case "TMN":
-                        System.out.println("최저온도: " + value + "℃");
-                        break;
-                    case "SKY":
-                        String skyStatus = "";
-                        switch (value) {
-                            case "1": skyStatus = "맑음"; break;
-                            case "3": skyStatus = "구름많음"; break;
-                            case "4": skyStatus = "흐림"; break;
-                        }
-                        System.out.println("하늘 상태: " + skyStatus);
-                        break;
-                    case "VEC":
-                        System.out.println("풍향: " + value);
-                        break;
-                    case "WSD":
-                        System.out.println("풍속: " + value + "m/s");
+                    case "PTY": // 강수 형태
+                        weather.put("pty", obj.getString("fcstValue"));
                         break;
                 }
             });
-            System.out.println("-----------------");
 
-            // 파싱된 전체 JSON 데이터를 클라이언트에 반환
-            return ResponseEntity.ok(result);
+            weather.put("baseDate", baseDate);
+            weather.put("baseTime", baseTime);
+            System.out.println(weather.toString());
+
+            return weather.toString();
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("날씨 정보를 가져오는 중 오류가 발생했습니다.");
+            return "{\"error\":\"Exception 발생\"}";
         }
     }
+
+
+    public String getFutureWeather(String gu) {
+        try {
+            String baseDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String baseTime = getBaseTime();
+
+            SeoulguDTO seoul = seoulguMapper.findseoul(gu);
+
+            System.out.println("data : " + seoul);
+
+
+            int nx = seoul.getNx();
+            int ny = seoul.getNy();
+
+            String apiURL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?"
+                    + "serviceKey=" + serviceKey
+                    + "&numOfRows=1000"
+                    + "&pageNo=1"
+                    + "&dataType=JSON"
+                    + "&base_date=" + baseDate
+                    + "&base_time=" + "0800"
+                    + "&nx=" + nx
+                    + "&ny=" + ny;
+
+            URL url = new URL(apiURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            if (conn.getResponseCode() != 200) {
+                return new JSONObject()
+                        .put("error", "API 호출 실패")
+                        .put("code", conn.getResponseCode())
+                        .toString();
+            }
+
+            StringBuilder result = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) result.append(line);
+            }
+            conn.disconnect();
+
+            JSONObject json = new JSONObject(result.toString());
+            JSONArray arr = json.getJSONObject("response")
+                    .getJSONObject("body")
+                    .getJSONObject("items")
+                    .getJSONArray("item");
+
+            // 시각별(TMP/SKY/PTY) 합치기
+            Map<String, JSONObject> slotMap = new HashMap<>();
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject it = arr.getJSONObject(i);
+                String cat = it.getString("category");
+                if (!("TMP".equals(cat) || "SKY".equals(cat) || "PTY".equals(cat))) continue;
+
+                String date = it.getString("fcstDate"); // yyyymmdd
+                String time = it.getString("fcstTime"); // HHmm
+                String key = date + time;
+
+                JSONObject slot = slotMap.getOrDefault(key, new JSONObject()
+                        .put("fcstDate", date)
+                        .put("fcstTime", time));
+                String val = it.getString("fcstValue");
+
+                switch (cat) {
+                    case "TMP": slot.put("temp", val); break;
+                    case "SKY": slot.put("sky", val);  break;
+                    case "PTY": slot.put("pty", val);  break;
+                }
+                slotMap.put(key, slot);
+            }
+
+            // "현재" = 예보 시각 중 현재시각과 가장 가까운 것 선택
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter D = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+            JSONObject current = null;
+            long bestDiff = Long.MAX_VALUE;
+
+            for (JSONObject s : slotMap.values()) {
+                String dtKey = s.getString("fcstDate") + s.getString("fcstTime");
+                LocalDateTime t = LocalDateTime.of(
+                        LocalDate.parse(dtKey.substring(0, 8), DateTimeFormatter.ofPattern("yyyyMMdd")),
+                        LocalTime.parse(dtKey.substring(8), DateTimeFormatter.ofPattern("HHmm"))
+                );
+                long diff = Math.abs(Duration.between(now, t).toMinutes());
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    current = s;
+                }
+            }
+
+            // 오늘/내일/모레 09:00 / 15:00
+            LocalDate today = LocalDate.now();
+            JSONArray days = new JSONArray();
+            for (int i = 0; i < 3; i++) {
+                LocalDate target = today.plusDays(i);
+                String ds = target.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+                JSONObject am = slotMap.getOrDefault(ds + "0900", new JSONObject());
+                JSONObject pm = slotMap.getOrDefault(ds + "1500", new JSONObject());
+
+                JSONObject day = new JSONObject()
+                        .put("date", ds)
+                        .put("label", (i == 0 ? "오늘" : (i == 1 ? "내일" : "모레")))
+                        .put("am", am)
+                        .put("pm", pm);
+                days.put(day);
+            }
+
+            // 결과 JSON
+            JSONObject out = new JSONObject();
+            out.put("gu", gu);
+            out.put("baseDate", baseDate);
+            out.put("baseTime", baseTime);
+            out.put("current", current != null ? current : new JSONObject());
+            out.put("days", days);
+            out.put("pm10", JSONObject.NULL); // 미세먼지 자리 비워둠
+
+            return out.toString();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JSONObject().put("error", "Exception 발생").toString();
+        }
+    }
+
+
+
+
+
+
 }
