@@ -14,5 +14,6 @@ public class MovieDTO {
     @JsonProperty("overview")
     private String overview;
 
-
+    @JsonProperty("release_date")
+    private String releaseDate;
 }

@@ -23,7 +23,7 @@ public class MovieService {
     public List<MovieDTO> getNowPlayingMovies() {
         URI uri = UriComponentsBuilder.fromUriString(TMDB_BASE_URL)
                 .queryParam("api_key", tmdbApiKey)
-
+                .queryParam("language", "ko-KR")
                 .build()
                 .toUri();
 
