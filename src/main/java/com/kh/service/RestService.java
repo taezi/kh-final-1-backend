@@ -21,7 +21,7 @@ public class RestService {
         // 사진 URL이 없는 식당은 API 호출하여 데이터 채우기
         for (RestDto rest : rests) {
             if (rest.getRestImgAddress() == null || rest.getRestImgAddress().isEmpty()) {
-                RestDto detailedRest = googlePlaceApiService.getRestDetails(rest.getRestName());
+                RestDto detailedRest = googlePlaceApiService.getRestDetails(rest.getRestName(),rest.getRestBranch());
                 if (detailedRest != null) {
                     rest.setRestImgAddress(detailedRest.getRestImgAddress());
                     rest.setRestType(detailedRest.getRestType());

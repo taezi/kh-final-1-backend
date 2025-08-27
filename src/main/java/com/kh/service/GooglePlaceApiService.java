@@ -67,9 +67,9 @@ public class GooglePlaceApiService {
      * @param placeBranch 검색할 장소 지점명
      * @return 상세 정보가 채워진 Cafe DTO, 실패 시 null 반환
      */
-    public Cafe getCafeDetails(String placeName, String placeBranch) {
+    public Cafe getCafeDetails(String cafeName, String cafeBranch) {
         // 이름과 지점명을 합쳐서 검색 쿼리를 생성합니다.
-        String placeQuery = placeName + " " + placeBranch;
+        String placeQuery = cafeName + " " + cafeBranch;
         String placeId = findPlaceId(placeQuery);
         if (placeId == null) return null;
 
@@ -94,7 +94,7 @@ public class GooglePlaceApiService {
 
             if (!resultNode.isMissingNode()) {
                 Cafe cafe = new Cafe();
-                cafe.setCafeName(placeName);
+                cafe.setCafeName(cafeName);
                 cafe.setCafeAddress(resultNode.path("formatted_address").asText(null));
                 cafe.setCafeRating(resultNode.path("rating").asText(null));
                 cafe.setCagePhonNumber(resultNode.path("formatted_phone_number").asText(null));
@@ -134,12 +134,12 @@ public class GooglePlaceApiService {
     /**
      * 장소 ID를 받아 상세 정보를 조회하고 RestDto DTO로 변환합니다.
      *
-     * @param placeName 검색할 장소 이름
+     * @param restName 검색할 장소 이름
      * @return 상세 정보가 채워진 RestDto DTO, 실패 시 null 반환
      */
-    public RestDto getRestDetails(String placeName) {
+    public RestDto getRestDetails(String restName, String restBranch) {
         // 이름과 지점명을 합쳐서 검색 쿼리를 생성합니다.
-        String placeQuery = placeName + " " + placeBranch;
+        String placeQuery = restName + " " + restBranch;
         String placeId = findPlaceId(placeQuery);
         if (placeId == null) return null;
 
@@ -164,7 +164,7 @@ public class GooglePlaceApiService {
 
             if (!resultNode.isMissingNode()) {
                 RestDto rest = new RestDto();
-                rest.setRestName(placeName);
+                rest.setRestName(restName);
                 rest.setRestAddress(resultNode.path("formatted_address").asText(null));
                 rest.setRestRating(resultNode.path("rating").asText(null));
                 rest.setRestPhonNumber(resultNode.path("formatted_phone_number").asText(null));

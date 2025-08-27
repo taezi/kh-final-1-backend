@@ -22,7 +22,7 @@ public class CafeService {
         // 사진 URL이 없는 카페는 API 호출하여 데이터 채우기
         for (CafeDto cafe : cafes) {
             if (cafe.getCafeImgAddress() == null || cafe.getCafeImgAddress().isEmpty()) {
-                Cafe detailedCafe = googlePlaceApiService.getCafeDetails(cafe.getCafeName());
+                Cafe detailedCafe = googlePlaceApiService.getCafeDetails(cafe.getCafeName(), cafe.getCafeBranch());
                 if (detailedCafe != null) {
                     cafe.setCafeImgAddress(detailedCafe.getCafeImgAddress());
                     cafe.setCafeType(detailedCafe.getCafeType());
