@@ -33,6 +33,11 @@ public class WeatherService {
     @Value("${weather.location.seoul.ny}")
     private int ny;
 
+    @Value("${seoul.api.key}")
+    private String seoulKey;
+
+
+
     private final SeoulguMapper seoulguMapper;
 
 
@@ -233,8 +238,34 @@ public class WeatherService {
                         .put("label", (i == 0 ? "오늘" : (i == 1 ? "내일" : "모레")))
                         .put("am", am)
                         .put("pm", pm);
+                System.out.println(seoul.getSeoulname() + " 날씨 : " + day);
                 days.put(day);
             }
+
+            //  서울시 대기질 API 호출 (PM10, PM25)
+            String airURL = "http://openAPI.seoul.go.kr:8088/" +
+                    seoulKey +
+                    "/json/"
+                    + "ListAirQualityByDistrictService/1/5/" + seoul.getMsradmcode(); // 자치구 코드 사용
+
+            URL airUrl = new URL(airURL);
+            HttpURLConnection airConn = (HttpURLConnection) airUrl.openConnection();
+            airConn.setRequestMethod("GET");
+
+            StringBuilder airResult = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(airConn.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) airResult.append(line);
+            }
+            airConn.disconnect();
+
+            JSONObject airJson = new JSONObject(airResult.toString());
+            JSONArray airArr = airJson.getJSONObject("ListAirQualityByDistrictService")
+                    .getJSONArray("row");
+            JSONObject airData = airArr.length() > 0 ? airArr.getJSONObject(0) : new JSONObject();
+
+            String pm10 = airData.optString("PM10", "");
+            String pm25 = airData.optString("PM25", "");
 
             // 결과 JSON
             JSONObject out = new JSONObject();
@@ -243,7 +274,9 @@ public class WeatherService {
             out.put("baseTime", baseTime);
             out.put("current", current != null ? current : new JSONObject());
             out.put("days", days);
-            out.put("pm10", JSONObject.NULL); // 미세먼지 자리 비워둠
+            out.put("pm10", pm10);
+            out.put("pm25", pm25);
+            System.out.println(seoul.getMsradmcode() + " 미세먼지 : " + out.toString());
 
             return out.toString();
 
