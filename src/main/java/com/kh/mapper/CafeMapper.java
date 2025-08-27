@@ -12,4 +12,4 @@ public interface CafeMapper {
     List<CafeDto> findAllCafes();
     void updateCafeDetails(CafeDto cafe);
     Cafe findCafeByName(@Param("cafeName") String cafeName);
-}
+}//

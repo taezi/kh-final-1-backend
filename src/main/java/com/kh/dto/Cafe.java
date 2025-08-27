@@ -21,4 +21,4 @@ public class Cafe {
     private String cafeSummary;
     private String cafeWebsite;
     private String cafeMapUrl;
-}
+}//

@@ -21,3 +21,4 @@ public class Rest {
     private String restWebsite;
     private String restMapUrl;
 }
+//

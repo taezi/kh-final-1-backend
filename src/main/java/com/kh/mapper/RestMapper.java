@@ -11,4 +11,4 @@ public interface RestMapper {
     List<RestDto> findAllRests();
     void updateRestDetails(RestDto rest);
     RestDto findRestByName(@Param("restName") String restName);
-}
+}//

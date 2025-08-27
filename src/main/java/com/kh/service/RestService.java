@@ -43,5 +43,5 @@ public class RestService {
 
     public RestDto getRestDetails(String restName) {
         return restMapper.findRestByName(restName);
-    }
+    }//
 }

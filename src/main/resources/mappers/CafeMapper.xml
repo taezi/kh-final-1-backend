@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kh.mapper.CafeMapper">
-
+    <!---->
     <!-- Cafe의 모든 컬럼을 매핑하는 ResultMap -->
     <resultMap id="CafeResultMap" type="com.kh.dto.Cafe">
         <id property="cafeNo" column="CAFENO" />
