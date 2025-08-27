@@ -33,7 +33,8 @@ public class SecurityConfig {
                                 "/api/place/**",
                                 "/api/weather/**",
                                 "/api/editor/**",
-                                "/api/movies/**"  //추가
+                                "/api/movies/**",  //추가
+                                "/api/cinemas/**"  //추가
                         ).permitAll()
                         .requestMatchers("/api/ai/**").authenticated()
                         .anyRequest().authenticated()
