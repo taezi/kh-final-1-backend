@@ -3,6 +3,8 @@ package com.kh.controller;
 import com.kh.dto.EditorDTO;
 import com.kh.service.EditorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,6 +17,25 @@ public class EditorController {
 
     @Autowired
     private EditorService editorService;
+
+
+//    private final S3Service s3Service;
+//
+//    public EditorController(S3Service s3Service) {
+//        this.s3Service = s3Service;
+//    }
+//
+//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Map<String, String> uploadImage(@RequestParam("file") MultipartFile file) {
+//        // 1. S3 업로드 실행
+//        String url = s3Service.upload(file);
+//
+//        // 2. 프론트에 JSON 형태로 응답
+//        Map<String, String> response = new HashMap<>();
+//        response.put("url", url);
+//        return response;
+//    }
+
 
     //게시글 등록
     @PostMapping("/posts")
@@ -34,11 +55,35 @@ public class EditorController {
     public  Map<String, Object> list(){
         Map<String, Object> map = new HashMap<>();
         List<EditorDTO> elist = editorService.selectEditorAll();
-
         map.put("eList",elist);
-
-
         return map;
-
     }
+
+    //게시글 상세 조회
+    @GetMapping("/detail/{editorno}")
+    public EditorDTO detail(@PathVariable long editorno) {
+        return editorService.selectEditorById(editorno);
+    }
+
+    //게시글 수정버튼
+    @PutMapping("/update/{editorno}")
+    public ResponseEntity<?> updateEditor(@PathVariable Long editorno,
+                                          @RequestBody EditorDTO editorDTO) {
+        editorDTO.setEditorno(editorno); // path variable 적용
+        boolean result = editorService.updateEditor(editorDTO);
+
+        if (result) {
+            return ResponseEntity.ok("수정 완료");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패");
+        }
+    }
+
+    //삭제
+    @DeleteMapping("/delete/{editorno}")
+    public String deletePost(@PathVariable long editorno) {
+        editorService.deleteEditor(editorno);
+        return "삭제 완료";
+    }
+
 }

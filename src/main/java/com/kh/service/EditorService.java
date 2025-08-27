@@ -22,4 +22,18 @@ public class EditorService {
     public List<EditorDTO> selectEditorAll() {
         return editorMapper.selectEditorAll();
     }
+
+    public EditorDTO selectEditorById(long editorno) {
+        return editorMapper.selectEditorById(editorno);
+    }
+
+    //게시글 수정완료
+    public void deleteEditor(long editorno) {
+        editorMapper.deleteEditor(editorno);
+    }
+
+    public boolean updateEditor(EditorDTO editorDTO) {
+        int cnt = editorMapper.updateEditor(editorDTO); // ✅ int 반환
+        return cnt > 0; // 1 이상이면 true
+    }
 }
