@@ -14,7 +14,7 @@ public class EditorDTO {
     private String editorcontent; // 내용
     private String editordate;
     private String edtiorupdatedate;
-    private long editorview;
+    private long editorview; //1
 
 
 
