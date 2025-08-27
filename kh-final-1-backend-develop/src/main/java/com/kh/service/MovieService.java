@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 public class MovieService {
+//TMDB API를 호출, 현재 상영 중인 영화 목록을 가져오는 로직
 
     @Value("${tmdb.api.key}")
     private String tmdbApiKey;
@@ -22,7 +23,7 @@ public class MovieService {
     public List<MovieDTO> getNowPlayingMovies() {
         URI uri = UriComponentsBuilder.fromUriString(TMDB_BASE_URL)
                 .queryParam("api_key", tmdbApiKey)
-                .queryParam("language", "ko-KR")
+
                 .build()
                 .toUri();
 

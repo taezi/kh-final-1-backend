@@ -9,10 +9,9 @@ import java.util.List;
 @Getter
 @Setter
 public class MovieResponse {
-    private int page;
-    private List<MovieDTO> results;
+    private int page; //현재 페이지 번호를 담는 필드
+    private List<MovieDTO> results;  //영화 목록 배열 담는 필드
     @JsonProperty("total_pages")
-    private int totalPages;
-    @JsonProperty("total_results")
-    private int totalResults;
+    private int totalPages;  //총 페이지 수를 담는 필드
+
 }

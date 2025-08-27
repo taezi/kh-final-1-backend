@@ -32,8 +32,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/place/**",
                                 "/api/weather/**",
-                                "/api/editor/**",
-                                "/api/movies/**"
+                                "/api/editor/**"
                         ).permitAll()
                         .requestMatchers("/api/ai/**").authenticated()
                         .anyRequest().authenticated()

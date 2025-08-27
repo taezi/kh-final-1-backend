@@ -1,13 +1,9 @@
 package com.kh.controller;
 
-import com.kh.dto.MovieDTO;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.kh.service.MovieService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.kh.service.MovieService;
-
-import java.util.List;
-
+//클라이언트의 요청을 받아 영화 관련 데이터를 제공하는 RESTful API 컨트롤러
 @RestController
 @RequestMapping("/api/movies")
 public class MovieController {
@@ -17,8 +13,4 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping("/now_playing")
-    public List<MovieDTO> getNowPlayingMovies() {
-        return movieService.getNowPlayingMovies();
-    }
 }
