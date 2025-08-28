@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
+import java.net.URL;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,24 +22,10 @@ public class EditorController {
 
     @Autowired
     private EditorService editorService;
+    @Autowired
+    private S3Presigner s3Presigner;
+    private final String bucket = "kh-final-1";
 
-
-//    private final S3Service s3Service;
-//
-//    public EditorController(S3Service s3Service) {
-//        this.s3Service = s3Service;
-//    }
-//
-//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public Map<String, String> uploadImage(@RequestParam("file") MultipartFile file) {
-//        // 1. S3 업로드 실행
-//        String url = s3Service.upload(file);
-//
-//        // 2. 프론트에 JSON 형태로 응답
-//        Map<String, String> response = new HashMap<>();
-//        response.put("url", url);
-//        return response;
-//    }
 
 
     //게시글 등록
@@ -84,6 +75,33 @@ public class EditorController {
     public String deletePost(@PathVariable long editorno) {
         editorService.deleteEditor(editorno);
         return "삭제 완료";
+    }
+    // s3이미지 업로드
+    @GetMapping("/s3/presigned")
+    public Map<String, String> getPresignedUrl(
+            @RequestParam String filename,
+            @RequestParam String contentType) {
+
+        String key = "uploads/" + System.currentTimeMillis() + "_" + filename;
+
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        PresignedPutObjectRequest presignedRequest =
+                s3Presigner.presignPutObject(r -> r
+                        .signatureDuration(Duration.ofMinutes(1)) // URL 유효시간 1분
+                        .putObjectRequest(objectRequest));
+
+        URL presignedUrl = presignedRequest.url();
+
+        Map<String, String> result = new HashMap<>();
+        result.put("uploadUrl", presignedUrl.toString()); // PUT할 주소
+        result.put("fileUrl", "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + key); // 업로드 완료 후 접근 URL
+        System.out.println(result);
+        return result;
     }
 
 }
