@@ -5,9 +5,6 @@
 <mapper namespace="com.kh.mapper.EditorMapper">
 
     <insert id="insertEditor">
-<!--        INSERT INTO EDITOR_TABLE(editortitle, editorcontent, userno)
-            VALUES (#{editortitle}, #{editorcontent}, #{userno})    -->
-
         INSERT INTO EDITOR_TABLE (userno, editortitle, editorcontent)
         VALUES (#{userno}, #{editortitle}, #{editorcontent})
     </insert>
@@ -16,4 +13,22 @@
         FROM EDITOR_TABLE
         ORDER BY editorno DESC
     </select>
+
+    <select id="selectEditorById" resultType="com.kh.dto.EditorDTO">
+        SELECT *
+        FROM EDITOR_TABLE
+        WHERE editorno = #{editorno}
+    </select>
+
+    <update id="updateEditor" parameterType="com.kh.dto.EditorDTO">
+        UPDATE EDITOR_TABLE
+        SET editortitle = #{editortitle},
+        editorcontent = #{editorcontent}
+        WHERE editorno = #{editorno}
+    </update>
+
+    <delete id="deleteEditor" parameterType="long">
+        DELETE FROM EDITOR_TABLE
+        WHERE editorno = #{editorno}
+    </delete>
 </mapper>

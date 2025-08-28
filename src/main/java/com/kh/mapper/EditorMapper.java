@@ -12,4 +12,10 @@ public interface EditorMapper {
     void insertEditor(EditorDTO editorDTO);
 
     List<EditorDTO> selectEditorAll();
+
+    EditorDTO selectEditorById(long editorno);
+
+    int updateEditor(EditorDTO editorDTO);
+
+    void deleteEditor(long editorno);
 }
