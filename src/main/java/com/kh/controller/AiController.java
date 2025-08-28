@@ -18,7 +18,8 @@ public class AiController {
 
     @GetMapping("/generate")
     public String askAi(@RequestParam String prompt) {
-
-        return aiService.generateText(prompt);
+        String response = aiService.generateText(prompt);
+        response = response.replace("```json", "").replace("```", "").trim();
+        return response;
     }
 }
