@@ -32,13 +32,26 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/place/**",
                                 "/api/weather/**",
-                                "/api/editor/**",
-                                "/api/notice/**",
-                                "/api/movies/**",  //추가
-                                "/api/cinemas/**"  //추가
-                        ).permitAll()
-                        .requestMatchers("/api/ai/**").authenticated()
-                        .anyRequest().authenticated()
+                                "/api/editor",
+                                "/api/editor/list",
+                                "/api/editor/detail/**",
+                                "/api/notice",
+                                "/api/movies/**",
+                                "/api/cinemas/**"
+                        ).permitAll() //공개주소
+                        .requestMatchers(
+                                "/api/admin/**",
+                                "/api/noticeWrite",
+                                "/api/notice/edit/**"
+                        ).hasAuthority("ROLE_ADMIN") // 관리자만 접속가능한 주소
+                        .requestMatchers(
+                                "/api/editorWrite",
+                                "/api/editor/posts",
+                                "/api/editor/edit/**",
+                                "/api/editor/s3/presigned",
+                                "/api/editor/delete/**"
+                        ).hasAuthority("ROLE_EDITOR") //에티터만 접속 가능한 주소
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

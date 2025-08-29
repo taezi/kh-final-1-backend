@@ -22,25 +22,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    // SecurityConfig의 permitAll과 동일하게 맞춤
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place",
-            "/api/weather", "/api/editor", "/api/movies", "/api/cinemas" //추가
+            "/api/auth/",
+            "/api/place/",
+            "/api/weather/",
+            "/api/editor/list",
+            "/api/editor/detail/",
+            "/api/notice",
+            "/api/movies/",
+            "/api/cinemas/"
     );
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        System.out.println("shouldNotFilter : "+path);
-        // OPTIONS(CORS preflight) 패스
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+        System.out.println("shouldNotFilter 체크 경로: " + path);
 
+        // OPTIONS 요청 (CORS preflight) 통과
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+        // 공개 경로 확인 - 정확한 패턴 매칭
+        return PUBLIC_PATHS.stream().anyMatch(publicPath -> {
+            if (publicPath.endsWith("/")) {
+                return path.startsWith(publicPath);
+            } else {
+                return path.equals(publicPath) || path.startsWith(publicPath + "/");
+            }
+        });
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
-        System.out.println(req.getContextPath());
+
+        System.out.println("JWT 필터 처리 경로: " + req.getServletPath());
+
         String auth = req.getHeader("Authorization");
 
         if (auth != null && auth.startsWith("Bearer ")) {
@@ -50,34 +69,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String id = jwtTokenProvider.getUseridFromToken(token);
                 String roles = jwtTokenProvider.getRolesFromToken(token);
 
-                // Spring Security가 인식할 수 있는 권한 객체로 변환
+                // Spring Security 권한 객체 생성
                 List<SimpleGrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority(roles));
+                        List.of(new SimpleGrantedAuthority("ROLE_" + roles.toUpperCase()));
 
-                // 인증 객체 생성 후 SecurityContextHolder에 저장
+                // 인증 객체 생성 및 SecurityContext 설정
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(id, null, authorities);
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                /////
 
-
-                // 컨트롤러에서 꺼내 쓰도록 request attribute로 전달
-                req.setAttribute("authenticatedUserid", id);
-                req.setAttribute("authenticatedRoles", roles);
+                System.out.println("인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
             } else {
-                res.setStatus(HttpStatus.UNAUTHORIZED.value());
-                res.setContentType("application/json;charset=UTF-8");
-                res.getWriter().write("{\"message\":\"권한 없음: 유효하지 않거나 토큰이 없습니다\"}");
+                System.out.println("유효하지 않은 토큰");
+                sendUnauthorizedResponse(res, "유효하지 않은 토큰입니다");
                 return;
             }
         } else {
-            res.setStatus(HttpStatus.UNAUTHORIZED.value());
-            res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("{\"message\":\"권한 없음: 토큰이 없습니다\"}");
+            System.out.println("토큰이 없음");
+            sendUnauthorizedResponse(res, "Authorization 헤더가 없거나 Bearer 토큰이 아닙니다");
             return;
         }
+
         chain.doFilter(req, res);
     }
-}
 
+    private void sendUnauthorizedResponse(HttpServletResponse res, String message) throws IOException {
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        res.setContentType("application/json;charset=UTF-8");
+        res.getWriter().write("{\"error\":\"" + message + "\"}");
+    }
+}
