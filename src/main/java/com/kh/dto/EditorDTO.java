@@ -16,6 +16,7 @@ public class EditorDTO {
     private String edtiorupdatedate;
     private long editorview;
     private String thumbnailUrl;
+    private String thumbnail;
 
 
 
