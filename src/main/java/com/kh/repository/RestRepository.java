@@ -1,6 +1,7 @@
 package com.kh.repository;
 
 import com.kh.dto.Rest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,5 @@ public interface RestRepository extends JpaRepository<Rest, Long> {
 
     // Spring Data JPA의 메서드 명명 규칙을 따라 특정 필드로 조회하는 메서드 정의
     Optional<Rest> findByRestNameAndRestBranch(String restName, String restBranch);
+
 }

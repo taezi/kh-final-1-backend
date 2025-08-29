@@ -4,6 +4,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.kh.dto.RestDto;
 
+import java.util.List;
+
 /**
  * RestMapper 인터페이스는 데이터베이스 작업을 위한 메서드를 정의합니다.
  * 이 인터페이스의 메서드 이름은 RestMapper.xml 파일의 쿼리 ID와 일치해야 합니다.
@@ -27,4 +29,11 @@ public interface RestMapper {
      * @return 조회된 카페 정보가 담긴 RestDto 객체
      */
     RestDto findByRestNameAndBranch(@Param("restName") String restName, @Param("restBranch") String restBranch);
+
+    /**
+     * 특정 지역구에 속한 식당 목록을 조회하는 메서드입니다. (새로 추가됨)
+     * @param region 조회할 지역구 이름
+     * @return 해당 지역구의 식당 목록
+     */
+    List<RestDto> findByRegion(String region);
 }

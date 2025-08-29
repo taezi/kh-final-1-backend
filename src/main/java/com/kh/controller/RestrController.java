@@ -3,11 +3,15 @@ package com.kh.controller;
 import com.kh.dto.RestDto;
 import com.kh.service.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,7 +53,7 @@ public class RestrController {
     }
 
     /**
-     * 기존 카페 정보를 업데이트하는 API 엔드포인트입니다.
+     * 기존 식당 정보를 업데이트하는 API 엔드포인트입니다.
      * 예: POST /api/rest/update
      * 요청 본문으로 RestDto 객체를 받습니다.
      * @param restDto 업데이트할 정보가 담긴 RestDto 객체
@@ -62,6 +66,22 @@ public class RestrController {
             return ResponseEntity.ok("카페 정보가 성공적으로 업데이트되었습니다.");
         } else {
             return ResponseEntity.badRequest().body("카페 정보 업데이트에 실패했습니다. (restNo 확인)");
+        }
+    }
+    /**
+     * 특정 지역구에 속한 식당 목록을 조회하는 API 엔드포인트입니다.
+     * 예: GET /api/rest/search?region=강남구
+     *
+     * @param region 조회할 지역구 이름
+     * @return 조회된 식당 목록 또는 HTTP 404 Not Found
+     */
+    @GetMapping("/search") // 새로운 엔드포인트 추가
+    public ResponseEntity<List<RestDto>> searchRestaurantsByRegion(@RequestParam("region") String region) {
+        List<RestDto> restaurants = restService.getRestaurantsByRegion(region);
+        if (!restaurants.isEmpty()) {
+            return ResponseEntity.ok(restaurants);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }

@@ -18,7 +18,6 @@ public class RestDto {
     private String restPhonNumber;
     private String restAddress;
     private String restRating;
-    private String restSummary;
     private String restWebsite;
     private String restMapUrl;
 }

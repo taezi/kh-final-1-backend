@@ -4,11 +4,13 @@ package com.kh.service;
 import com.kh.dto.RestDto;
 import com.kh.mapper.RestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 
 /**
@@ -63,5 +65,18 @@ public class RestService {
             }
         }
         return finalRestDto;
+    }
+    /**
+     * 특정 지역구에 속한 식당 목록을 조회하는 메서드입니다. (새로 추가됨)
+     * @param region 조회할 지역구 이름
+     * @return 해당 지역구의 식당 목록
+     */
+    public List<RestDto> getRestaurantsByRegion(String region) {
+        // restMapper를 사용하여 특정 지역구의 식당 목록을 가져옵니다.
+        List<RestDto> restaurants = restMapper.findByRegion(region);
+
+        // 추가적인 비즈니스 로직이 필요하면 여기에 구현할 수 있습니다.
+
+        return restaurants;
     }
 }

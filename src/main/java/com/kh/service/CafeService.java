@@ -3,11 +3,15 @@ package com.kh.service;
 import com.kh.dto.CafeDto;
 import com.kh.mapper.CafeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 
 /**
@@ -63,4 +67,19 @@ public class CafeService {
         }
         return finalCafeDto;
     }
+    /**
+     * 특정 지역구에 속한 카페 목록을 조회하는 메서드입니다. (새로 추가됨)
+     * @param region 조회할 지역구 이름
+     * @return 해당 지역구의 카페 목록
+     */
+    public List<CafeDto> getCafesByRegion(String region) {
+        // cafeMapper를 사용하여 특정 지역구의 카페 목록을 가져옵니다.
+        List<CafeDto> cafes = cafeMapper.findByRegion(region);
+
+        // 추가적인 비즈니스 로직이 필요하면 여기에 구현할 수 있습니다.
+
+        return cafes;
+    }
+
+
 }

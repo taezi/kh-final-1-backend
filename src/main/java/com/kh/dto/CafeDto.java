@@ -18,7 +18,6 @@ public class CafeDto {
     private String cafePhonNumber;
     private String cafeAddress;
     private String cafeRating;
-    private String cafeSummary;
     private String cafeWebsite;
     private String cafeMapUrl;
 }//
