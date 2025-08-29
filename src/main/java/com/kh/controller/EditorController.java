@@ -32,10 +32,7 @@ public class EditorController {
     @PostMapping("/posts")
     public String createPost(@RequestBody EditorDTO editorDTO) {
         System.out.println("받은 데이터: " + editorDTO);
-        System.out.println(editorDTO.getEditorcontent());
-//        String content = editorDTO.getEditorcontent();
-//
-//        editorDTO.setEditortitle(content);
+
 
         editorService.insertEditor(editorDTO);
         return "저장 성공";
