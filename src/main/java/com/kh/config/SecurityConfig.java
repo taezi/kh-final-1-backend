@@ -32,7 +32,9 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/place/**",
                                 "/api/weather/**",
-                                "/api/editor/**"
+                                "/api/editor/**",
+                                "/api/cafe/**",
+                                "/api/rest/**"
                         ).permitAll()
                         .requestMatchers("/api/ai/**").authenticated()
                         .anyRequest().authenticated()

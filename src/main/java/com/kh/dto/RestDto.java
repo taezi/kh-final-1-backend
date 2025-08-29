@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestDto {
+    private int restNo;
     private String restName;
     private String restBranch;
     private String restRegion;

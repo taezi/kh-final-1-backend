@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CafeDto {
+    private int cafeNo;
     private String cafeName;
     private String cafeBranch;
     private String cafeRegion;
