@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-//영화관 한 곳의 정보. 네이버 검색 API의 응답 필드명과 일치시켜야 함
 @Getter
 @Setter
 public class CinemaDTO {
-    @JsonProperty("title")
-    private String title;
-    @JsonProperty("address")
-    private String address;
-    @JsonProperty("mapx")
-    private String mapX;
-    @JsonProperty("mapy")
-    private String mapY;
+    @JsonProperty("place_name")
+    private String name; // 카카오 API의 영화관 이름 필드명
+    @JsonProperty("address_name")
+    private String address; // 카카오 API의 주소 필드명
+    @JsonProperty("x")
+    private String x; // 경도 (longitude)
+    @JsonProperty("y")
+    private String y; // 위도 (latitude)
 }
