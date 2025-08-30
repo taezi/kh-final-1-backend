@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,8 +101,8 @@ public class AuthController {
 
     /** 보호된 API: 필터가 넣어준 attribute 사용 */
     @GetMapping("/user-data")
-    public ResponseEntity<MemberDTO> getUserData(HttpServletRequest req){
-        String userno = (String) req.getAttribute("authenticatedUserid");
+    public ResponseEntity<MemberDTO> getUserData(@AuthenticationPrincipal String userId){
+        String userno = userId;
         if (userno == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
