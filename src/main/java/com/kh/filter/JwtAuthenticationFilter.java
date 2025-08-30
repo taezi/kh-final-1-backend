@@ -22,14 +22,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    // SecurityConfig의 permitAll과 동일하게 맞춤
+    // SecurityConfig의 permitAll과 정확히 일치하도록 수정
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/auth/",
             "/api/place/",
             "/api/weather/",
-            "/api/editor/list",
+            "/api/editor",           // 정확한 경로
+            "/api/editor/list",      // 정확한 경로
             "/api/editor/detail/",
-            "/api/notice",
             "/api/movies/",
             "/api/cinemas/"
     );
@@ -37,28 +37,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        System.out.println("shouldNotFilter 체크 경로: " + path);
+        String method = request.getMethod();
+
+        System.out.println("shouldNotFilter 체크 - 경로: " + path + ", 메소드: " + method);
 
         // OPTIONS 요청 (CORS preflight) 통과
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(method)) {
             return true;
         }
 
-        // 공개 경로 확인 - 정확한 패턴 매칭
-        return PUBLIC_PATHS.stream().anyMatch(publicPath -> {
+        // GET 요청의 공지사항 조회는 인증 불필요
+        if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/notices")) {
+            System.out.println("공지사항 GET 요청 - 인증 불필요");
+            return true;
+        }
+
+        // 기타 완전 공개 경로 확인
+        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(publicPath -> {
             if (publicPath.endsWith("/")) {
                 return path.startsWith(publicPath);
             } else {
                 return path.equals(publicPath) || path.startsWith(publicPath + "/");
             }
         });
+
+        if (isPublic) {
+            System.out.println("공개 경로 - 인증 불필요");
+        }
+
+        return isPublic;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
 
-        System.out.println("JWT 필터 처리 경로: " + req.getServletPath());
+        System.out.println("JWT 필터 처리 - 경로: " + req.getServletPath() + ", 메소드: " + req.getMethod());
 
         String auth = req.getHeader("Authorization");
 
@@ -85,7 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            System.out.println("토큰이 없음");
+            System.out.println("토큰이 없음 - 경로: " + req.getServletPath());
             sendUnauthorizedResponse(res, "Authorization 헤더가 없거나 Bearer 토큰이 아닙니다");
             return;
         }

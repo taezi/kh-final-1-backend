@@ -5,8 +5,8 @@
 <mapper namespace="com.kh.mapper.EditorMapper">
 
     <insert id="insertEditor">
-        INSERT INTO EDITOR_TABLE (userno, editortitle, editorcontent, thumbnailurl, thumbnail)
-        VALUES (#{userno}, #{editortitle}, #{editorcontent}, #{thumbnailUrl}, #{thumbnail})
+        INSERT INTO EDITOR_TABLE (userno, editortitle, editorcontent, thumbnailurl, contentimgurl)
+        VALUES (#{userno}, #{editortitle}, #{editorcontent}, #{thumbnailUrl}, #{contentImgUrl})
     </insert>
     <select id="selectEditorAll">
         SELECT *
