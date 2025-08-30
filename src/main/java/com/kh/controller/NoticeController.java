@@ -12,38 +12,27 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/notice")
+@RequestMapping("/api/notices")
 public class NoticeController {
 
     @Autowired
     private NoticeService noticeService;
 
     // 공지사항 등록
-    @PostMapping("/write")
-    public String createNotice(@RequestBody NoticeDTO noticeDTO) {
+    @PostMapping
+    public ResponseEntity<?> createNotice(@RequestBody NoticeDTO noticeDTO) {
         System.out.println("공지사항 받은 데이터: " + noticeDTO);
         noticeService.insertNotice(noticeDTO);
-        return "저장 성공";
+        return ResponseEntity.status(HttpStatus.CREATED).body("저장 성공");
     }
 
     // 공지사항 전체 목록 조회 (페이징 가능)
-    @GetMapping("/list")
-    public Map<String, Object> list(@RequestParam(defaultValue = "1") int page,
+    @GetMapping({"", "/"})
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> list(@RequestParam(defaultValue = "1") int page,
                                     @RequestParam(defaultValue = "10") int size) {
+        System.out.println("page : " + page);
         Map<String, Object> map = new HashMap<>();
-
-        /*int offset = (page - 1) * size;*/ // 이걸 왜여따 넣음?? 이거 오류
-
-        /*
-        * page :1
-        * size :10
-        *  파라미터로 넘기는데  offset 미리계산해서
-        * noticeService.selectNoticeAll 로직에서 start end 파라미터 잘못 넘어가서 오류가남
-        * noticeService.selectNoticeAll(offset, @RequestParam(defaultValue = "10") int size) 비정상 offset 으로 인한 파라미터 값오류
-        * noticeService.selectNoticeAll(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) 정상
-        *  이상
-        *   */
-
 
 
         List<NoticeDTO> nList = noticeService.selectNoticeAll(page, size);
@@ -51,17 +40,19 @@ public class NoticeController {
 
         map.put("nList", nList);
         map.put("total", total);
-        return map;
+        System.out.println("nList : " + nList);
+        System.out.println("total : " + total);
+        return ResponseEntity.ok(map);
     }
 
     // 공지사항 상세 조회
-    @GetMapping("/detail/{noticeno}")
+    @GetMapping("/{noticeno}")
     public NoticeDTO detail(@PathVariable long noticeno) {
         return noticeService.selectNoticeById(noticeno);
     }
 
     // 공지사항 수정
-    @PutMapping("/update/{noticeno}")
+    @PutMapping("/{noticeno}")
     public ResponseEntity<?> updateNotice(@PathVariable long noticeno,
                                           @RequestBody NoticeDTO noticeDTO) {
         noticeDTO.setNoticeno(noticeno); // path variable 적용
@@ -75,9 +66,9 @@ public class NoticeController {
     }
 
     // 공지사항 삭제
-    @DeleteMapping("/delete/{noticeno}")
-    public String deleteNotice(@PathVariable long noticeno) {
+    @DeleteMapping("/{noticeno}")
+    public ResponseEntity<?> deleteNotice(@PathVariable long noticeno) {
         noticeService.deleteNotice(noticeno);
-        return "삭제 완료";
+        return ResponseEntity.ok("삭제 완료");
     }
 }

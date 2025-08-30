@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,22 +36,19 @@ public class SecurityConfig {
                                 "/api/editor",
                                 "/api/editor/list",
                                 "/api/editor/detail/**",
-                                "/api/notice",
                                 "/api/movies/**",
                                 "/api/cinemas/**"
                         ).permitAll() //공개주소
-                        .requestMatchers(
-                                "/api/admin/**",
-                                "/api/noticeWrite",
-                                "/api/notice/edit/**"
-                        ).hasAuthority("ROLE_ADMIN") // 관리자만 접속가능한 주소
+                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll()
+                        .requestMatchers("/api/notices/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/api/editorWrite",
                                 "/api/editor/posts",
                                 "/api/editor/edit/**",
                                 "/api/editor/s3/presigned",
                                 "/api/editor/delete/**"
-                        ).hasAuthority("ROLE_EDITOR") //에티터만 접속 가능한 주소
+                        ).hasRole("EDITOR") //에티터만 접속 가능한 주소
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .cors(Customizer.withDefaults())
