@@ -1,7 +1,7 @@
 package com.kh.service;
 
 import com.kh.dto.CinemaDTO;
-import com.kh.dto.NaverSearchResponse;
+import com.kh.dto.KakaoSearchResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,34 +19,31 @@ import java.util.List;
 @Service
 public class CinemaService {
 
-    @Value("${naver.api.client-id}")
-    private String naverClientId;
-    @Value("${naver.api.client-secret}")
-    private String naverClientSecret;
+    @Value("${kakao.api.rest-api-key}")
+    private String kakaoRestApiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String NAVER_SEARCH_URL = "https://openapi.naver.com/v1/search/local.json";
+    private static final String KAKAO_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 
     public List<CinemaDTO> searchCinemasByRegion(String region) {
         try {
-            URI uri = UriComponentsBuilder.fromUriString(NAVER_SEARCH_URL)
+            URI uri = UriComponentsBuilder.fromUriString(KAKAO_SEARCH_URL)
                     .queryParam("query", region + " 영화관")
                     .build()
                     .encode(StandardCharsets.UTF_8)
                     .toUri();
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("X-Naver-Client-Id", naverClientId);
-            headers.set("X-Naver-Client-Secret", naverClientSecret);
+            headers.set("Authorization", "KakaoAK " + kakaoRestApiKey);
 
             HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
-            ResponseEntity<NaverSearchResponse> response = restTemplate.exchange(
-                    uri, HttpMethod.GET, entity, NaverSearchResponse.class);
+            ResponseEntity<KakaoSearchResponse> response = restTemplate.exchange(
+                    uri, HttpMethod.GET, entity, KakaoSearchResponse.class);
 
-            System.out.println("네이버 API 응답: " + response.getBody());
+            System.out.println("카카오 API 응답: " + response.getBody());
 
-            return response.getBody() != null ? response.getBody().getItems() : Collections.emptyList();
+            return response.getBody() != null ? response.getBody().getDocuments() : Collections.emptyList();
         } catch (Exception e) {
             e.printStackTrace();
             return Collections.emptyList();
