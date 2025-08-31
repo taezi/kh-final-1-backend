@@ -33,22 +33,13 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/place/**",
                                 "/api/weather/**",
-                                "/api/editor",
-                                "/api/editor/list",
-                                "/api/editor/detail/**",
                                 "/api/movies/**",
                                 "/api/cinemas/**"
                         ).permitAll() //공개주소
-                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll()
-                        .requestMatchers("/api/notices/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(
-                                "/api/editorWrite",
-                                "/api/editor/posts",
-                                "/api/editor/edit/**",
-                                "/api/editor/s3/presigned",
-                                "/api/editor/delete/**"
-                        ).hasRole("EDITOR") //에티터만 접속 가능한 주소
+                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // GET만 허용 나머지는 관리자권한 필요
+                        .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/editors/**").permitAll() // GET만 허용 나머지는 에디터권한 필요
+                        .requestMatchers("/api/editors/**").hasRole("EDITOR")
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .cors(Customizer.withDefaults())

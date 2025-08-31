@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/editor")
+@RequestMapping("/api/editors") // 복수형으로 변경
 public class EditorController {
 
     @Autowired
@@ -26,56 +26,51 @@ public class EditorController {
     private S3Presigner s3Presigner;
     private final String bucket = "kh-final-1";
 
-
-
-    //게시글 등록
-    @PostMapping("/posts")
-    public String createPost(@RequestBody EditorDTO editorDTO) {
-        System.out.println("받은 데이터: " + editorDTO);
-
-
+    // 게시글 등록
+    @PostMapping
+    public ResponseEntity<?> createEditor(@RequestBody EditorDTO editorDTO) {
         editorService.insertEditor(editorDTO);
-        return "저장 성공";
+        return ResponseEntity.status(HttpStatus.CREATED).body("저장 성공");
     }
 
-    //게시글 전체 목록 조회
-    @GetMapping("/list")
-    public  Map<String, Object> list(){
+    // 게시글 전체 목록 조회
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> list() {
         Map<String, Object> map = new HashMap<>();
-        List<EditorDTO> elist = editorService.selectEditorAll();
-        map.put("eList",elist);
-        return map;
+        List<EditorDTO> eList = editorService.selectEditorAll();
+        System.out.println("eList : " + eList);
+        map.put("eList", eList);
+        return ResponseEntity.ok(map);
     }
 
-    //게시글 상세 조회
-    @GetMapping("/detail/{editorno}")
-    public EditorDTO detail(@PathVariable long editorno) {
-        return editorService.selectEditorById(editorno);
+    // 게시글 상세 조회
+    @GetMapping("/{editorno}")
+    public ResponseEntity<EditorDTO> detail(@PathVariable long editorno) {
+        return ResponseEntity.ok(editorService.selectEditorById(editorno));
     }
 
-    //게시글 수정버튼
-    @PutMapping("/update/{editorno}")
+    // 게시글 수정
+    @PutMapping("/{editorno}")
     public ResponseEntity<?> updateEditor(@PathVariable Long editorno,
                                           @RequestBody EditorDTO editorDTO) {
-        editorDTO.setEditorno(editorno); // path variable 적용
+        System.out.println("게시글 수정 글번호 : " + editorno);
+        System.out.println("게시글 수정 정보 : " + editorDTO);
+        editorDTO.setEditorno(editorno);
         boolean result = editorService.updateEditor(editorDTO);
-
-        if (result) {
-            return ResponseEntity.ok("수정 완료");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패");
-        }
+        return result ? ResponseEntity.ok("수정 완료")
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패");
     }
 
-    //삭제
-    @DeleteMapping("/delete/{editorno}")
-    public String deletePost(@PathVariable long editorno) {
+    // 게시글 삭제
+    @DeleteMapping("/{editorno}")
+    public ResponseEntity<?> deleteEditor(@PathVariable long editorno) {
         editorService.deleteEditor(editorno);
-        return "삭제 완료";
+        return ResponseEntity.ok("삭제 완료");
     }
-    // s3이미지 업로드
+
+    // S3 Presigned URL 발급
     @GetMapping("/s3/presigned")
-    public Map<String, String> getPresignedUrl(
+    public ResponseEntity<Map<String, String>> getPresignedUrl(
             @RequestParam String filename,
             @RequestParam String contentType) {
 
@@ -89,16 +84,14 @@ public class EditorController {
 
         PresignedPutObjectRequest presignedRequest =
                 s3Presigner.presignPutObject(r -> r
-                        .signatureDuration(Duration.ofMinutes(1)) // URL 유효시간 1분
+                        .signatureDuration(Duration.ofMinutes(1))
                         .putObjectRequest(objectRequest));
 
         URL presignedUrl = presignedRequest.url();
 
         Map<String, String> result = new HashMap<>();
-        result.put("uploadUrl", presignedUrl.toString()); // PUT할 주소
-        result.put("fileUrl", "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + key); // 업로드 완료 후 접근 URL
-        System.out.println(result);
-        return result;
+        result.put("uploadUrl", presignedUrl.toString());
+        result.put("fileUrl", "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + key);
+        return ResponseEntity.ok(result);
     }
-
 }

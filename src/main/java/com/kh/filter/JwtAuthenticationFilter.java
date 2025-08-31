@@ -27,9 +27,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/",
             "/api/place/",
             "/api/weather/",
-            "/api/editor",           // 정확한 경로
-            "/api/editor/list",      // 정확한 경로
-            "/api/editor/detail/",
             "/api/movies/",
             "/api/cinemas/"
     );
@@ -49,6 +46,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // GET 요청의 공지사항 조회는 인증 불필요
         if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/notices")) {
             System.out.println("공지사항 GET 요청 - 인증 불필요");
+            return true;
+        }
+        //  GET 요청의 에디터 게시판 조회는 인증 불필요
+        if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/editors")) {
             return true;
         }
 

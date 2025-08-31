@@ -13,7 +13,7 @@ public class EditorDTO {
     private String editortitle;   // 제목
     private String editorcontent; // 내용
     private String editordate;
-    private String edtiorupdatedate;
+    private String editorupdatedate;
     private long editorview;
     private String thumbnailUrl;
     private String contentImgUrl;
