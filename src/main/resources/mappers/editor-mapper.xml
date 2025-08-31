@@ -23,8 +23,12 @@
     <update id="updateEditor" parameterType="com.kh.dto.EditorDTO">
         UPDATE EDITOR_TABLE
         SET editortitle = #{editortitle},
-        editorcontent = #{editorcontent}
+        editorcontent = #{editorcontent},
+        thumbnailurl = #{thumbnailUrl},
+        contentimgurl = #{contentImgUrl},
+        editorupdatedate = sysdate
         WHERE editorno = #{editorno}
+
     </update>
 
     <delete id="deleteEditor" parameterType="long">
