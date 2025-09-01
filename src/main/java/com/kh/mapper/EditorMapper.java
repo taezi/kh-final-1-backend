@@ -4,6 +4,7 @@ import com.kh.dto.EditorDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface EditorMapper {
@@ -22,4 +23,8 @@ public interface EditorMapper {
 
     //게시글 삭제
     void deleteEditor(long editorno);
+
+    //검색
+    List<EditorDTO> findEditors(Map<String, Object> params);
+
 }

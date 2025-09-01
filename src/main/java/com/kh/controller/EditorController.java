@@ -68,6 +68,20 @@ public class EditorController {
         return ResponseEntity.ok("삭제 완료");
     }
 
+    // 게시글 검색 기능
+    @GetMapping("/editor")
+    public ResponseEntity<Map<String, Object>> getEditors(
+            @RequestParam(required = false) String search) {
+
+        List<EditorDTO> editors = editorService.findEditors(search);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("eList", editors);
+
+        return ResponseEntity.ok(result);
+    }
+
+
     // S3 Presigned URL 발급
     @GetMapping("/s3/presigned")
     public ResponseEntity<Map<String, String>> getPresignedUrl(
