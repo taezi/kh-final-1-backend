@@ -35,4 +35,13 @@
         DELETE FROM EDITOR_TABLE
         WHERE editorno = #{editorno}
     </delete>
+
+    <!-- 검색  -->
+    <select id="findEditors" resultType="com.kh.dto.EditorDTO" parameterType="map">
+        SELECT *
+        FROM EDITOR_TABLE
+        WHERE editortitle LIKE '%' || #{search} || '%'
+        ORDER BY editorno DESC
+    </select>
+
 </mapper>
