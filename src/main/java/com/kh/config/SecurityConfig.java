@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,10 +35,16 @@ public class SecurityConfig {
                                 "/api/weather/**",
                                 "/api/editor/**",
                                 "/api/cafe/**",
-                                "/api/rest/**"
+                                "/api/rest/**",
+                                "/api/movies/**",
+                                "/api/cinemas/**"
                         ).permitAll()
                         .requestMatchers("/api/ai/**").authenticated()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // GET만 허용 나머지는 관리자권한 필요
+                        .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/editors/**").permitAll() // GET만 허용 나머지는 에디터권한 필요
+                        .requestMatchers("/api/editors/**").hasRole("EDITOR")
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

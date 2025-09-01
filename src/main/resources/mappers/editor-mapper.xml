@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kh.mapper.EditorMapper">
+
+    <insert id="insertEditor">
+        INSERT INTO EDITOR_TABLE (userno, editortitle, editorcontent, thumbnailurl, contentimgurl)
+        VALUES (#{userno}, #{editortitle}, #{editorcontent}, #{thumbnailUrl}, #{contentImgUrl})
+    </insert>
+    <select id="selectEditorAll">
+        SELECT *
+        FROM EDITOR_TABLE
+        ORDER BY editorno DESC
+    </select>
+
+    <select id="selectEditorById" resultType="com.kh.dto.EditorDTO">
+        SELECT *
+        FROM EDITOR_TABLE
+        WHERE editorno = #{editorno}
+    </select>
+
+    <update id="updateEditor" parameterType="com.kh.dto.EditorDTO">
+        UPDATE EDITOR_TABLE
+        SET editortitle = #{editortitle},
+        editorcontent = #{editorcontent},
+        thumbnailurl = #{thumbnailUrl},
+        contentimgurl = #{contentImgUrl},
+        editorupdatedate = sysdate
+        WHERE editorno = #{editorno}
+
+    </update>
+
+    <delete id="deleteEditor" parameterType="long">
+        DELETE FROM EDITOR_TABLE
+        WHERE editorno = #{editorno}
+    </delete>
+</mapper>

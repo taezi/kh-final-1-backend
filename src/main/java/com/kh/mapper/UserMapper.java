@@ -10,4 +10,6 @@ public interface UserMapper {
     void registerUser(MemberDTO user);
 
     MemberDTO findByid(long userno);
+
+    MemberDTO findByUsername(String beforeUsername);
 }

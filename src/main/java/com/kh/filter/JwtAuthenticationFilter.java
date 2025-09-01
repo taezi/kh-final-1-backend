@@ -22,9 +22,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    // SecurityConfig의 permitAll과 정확히 일치하도록 수정
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place",
-            "/api/weather", "/api/editor","/api/cafes"
+
+            "/api/weather",
+            "/api/editor",
+            "/api/cafes",
+            "/api/auth/",
+            "/api/place/",
+            "/api/weather/",
+            "/api/movies/",
+            "/api/cinemas/"
     );
 
     @Override

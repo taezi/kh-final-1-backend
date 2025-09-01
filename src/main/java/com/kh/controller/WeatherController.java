@@ -1,23 +1,28 @@
 package com.kh.controller;
 
 import com.kh.service.WeatherService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
 @RequestMapping("/api/weather")
-@RequiredArgsConstructor
+@RestController
 public class WeatherController {
 
     private final WeatherService weatherService;
 
+    public WeatherController(WeatherService weatherService) {
+        this.weatherService = weatherService;
+    }
+
     @GetMapping("/now")
-    public ResponseEntity<String> getSeoulWeather() {
-        // 날씨 서비스에서 API 호출 결과를 받아 클라이언트에 반환
-        System.out.println(weatherService.getSeoulWeather());
+    public String getSeoulWeather() {
         return weatherService.getSeoulWeather();
+    }
+    @GetMapping(value = "/future", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String future(@RequestParam(defaultValue = "강남구") String gu) {
+        return weatherService.getFutureWeather(gu);
     }
 }
