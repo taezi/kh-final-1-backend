@@ -1,8 +1,11 @@
 package com.kh.service;
 
+import com.kh.dto.InquiryDTO;
 import com.kh.mapper.ManageMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ManageService {
@@ -32,5 +35,18 @@ public class ManageService {
 
     public int updatePassword(String userid, String encodedAfterPassword) {
         return mapper.updatePassword(userid, encodedAfterPassword);
+    }
+
+    public int insertInquiry(InquiryDTO inquiryDTO) {
+        return mapper.insertInquiry(inquiryDTO);
+    }
+
+    public List<InquiryDTO> getInquiriesByUser(int userno) {
+        return mapper.getInquiriesByUser(userno);
+    }
+
+
+    public InquiryDTO getInquiryDetail(int inquiryno) {
+        return mapper.getInquiryDetail(inquiryno);
     }
 }
