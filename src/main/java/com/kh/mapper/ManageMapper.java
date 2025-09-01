@@ -1,6 +1,9 @@
 package com.kh.mapper;
 
+import com.kh.dto.InquiryDTO;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 @Mapper
 public interface ManageMapper {
@@ -15,4 +18,11 @@ public interface ManageMapper {
     int updateEmail(String userid, String afterEmail);
 
     int updatePassword(String userid, String encodedAfterPassword);
+
+    int insertInquiry(InquiryDTO inquiryDTO);
+
+    List<InquiryDTO> getInquiriesByUser(int userno);
+
+
+    InquiryDTO getInquiryDetail(int inquiryno);
 }
