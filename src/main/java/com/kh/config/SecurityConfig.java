@@ -29,21 +29,28 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
+                        // 1. 모든 GET 요청에 대한 permitAll 규칙들을 먼저 배치
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/movie/**",
+                                "/api/notices/**",
+                                "/api/editors/**",
                                 "/api/place/**",
                                 "/api/weather/**",
-                                "/api/movies/**",
                                 "/api/cinemas/**"
-                        ).permitAll() //공개주소
-                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // GET만 허용 나머지는 관리자권한 필요
+                        ).permitAll()
+
+                        // 2. 인증이 필요한 POST 요청을 구체적으로 명시
+                        .requestMatchers(HttpMethod.POST, "/api/movie/review").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll() // 로그인/회원가입 등
+
+                        // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
                         .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/editors/**").permitAll() // GET만 허용 나머지는 에디터권한 필요
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
                         .requestMatchers(
                                 "/api/manage/inquiry/**",
                                 "/api/bookmarks/**").authenticated()  // 로그인한 유저만 사용가능
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
+
                 )
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
