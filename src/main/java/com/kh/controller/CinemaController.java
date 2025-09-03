@@ -17,7 +17,7 @@ public class CinemaController {
 
     private final CinemaService cinemaService;
 
-    @GetMapping
+    @GetMapping("/region")
     public List<CinemaDTO> getCinemasByRegion(@RequestParam("region") String region) {
         return cinemaService.searchCinemasByRegion(region);
     }

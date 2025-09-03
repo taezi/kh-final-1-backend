@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -22,58 +24,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    // SecurityConfig의 permitAll과 정확히 일치하도록 수정
-    private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/",
-            "/api/place/",
-            "/api/weather/",
-            "/api/movies/",
-            "/api/cinemas/"
-    );
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        String method = request.getMethod();
-
-        System.out.println("shouldNotFilter 체크 - 경로: " + path + ", 메소드: " + method);
-
-        // OPTIONS 요청 (CORS preflight) 통과
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            return true;
-        }
-
-        // GET 요청의 공지사항 조회는 인증 불필요
-        if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/notices")) {
-            System.out.println("공지사항 GET 요청 - 인증 불필요");
-            return true;
-        }
-        //  GET 요청의 에디터 게시판 조회는 인증 불필요
-        if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/editors")) {
-            return true;
-        }
-
-        // 기타 완전 공개 경로 확인
-        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(publicPath -> {
-            if (publicPath.endsWith("/")) {
-                return path.startsWith(publicPath);
-            } else {
-                return path.equals(publicPath) || path.startsWith(publicPath + "/");
-            }
-        });
-
-        if (isPublic) {
-            System.out.println("공개 경로 - 인증 불필요");
-        }
-
-        return isPublic;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
 
-        System.out.println("JWT 필터 처리 - 경로: " + req.getServletPath() + ", 메소드: " + req.getMethod());
+        System.out.println("### JWT Filter: doFilterInternal 시작 - 경로: " + req.getServletPath() + ", 메소드: " + req.getMethod());
 
         String auth = req.getHeader("Authorization");
 
@@ -82,30 +37,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtTokenProvider.validateToken(token)) {
                 String id = jwtTokenProvider.getUseridFromToken(token);
-                String roles = jwtTokenProvider.getRolesFromToken(token);
+                String rolesString = jwtTokenProvider.getRolesFromToken(token);
 
-                // Spring Security 권한 객체 생성
-                List<SimpleGrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority("ROLE_" + roles.toUpperCase()));
+                List<SimpleGrantedAuthority> authorities;
+                if (rolesString != null && !rolesString.isEmpty()) {
+                    authorities = Arrays.stream(rolesString.split(","))
+                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.trim().toUpperCase()))
+                            .collect(Collectors.toList());
+                } else {
+                    authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                }
 
-                // 인증 객체 생성 및 SecurityContext 설정
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(id, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                System.out.println("인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
+                System.out.println("### JWT Filter: 인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
             } else {
-                System.out.println("유효하지 않은 토큰");
+                System.out.println("### JWT Filter: 유효하지 않은 토큰 감지.");
                 sendUnauthorizedResponse(res, "유효하지 않은 토큰입니다");
                 return;
             }
-        } else {
-            System.out.println("토큰이 없음 - 경로: " + req.getServletPath());
-            sendUnauthorizedResponse(res, "Authorization 헤더가 없거나 Bearer 토큰이 아닙니다");
-            return;
+        }else {
+            System.out.println("### JWT Filter: Authorization 헤더 없음 또는 Bearer 토큰 아님. 다음 필터로 진행.");
         }
 
         chain.doFilter(req, res);
+        System.out.println("### JWT Filter: doFilterInternal 종료 - 다음 필터로 전달됨.");
     }
 
     private void sendUnauthorizedResponse(HttpServletResponse res, String message) throws IOException {
