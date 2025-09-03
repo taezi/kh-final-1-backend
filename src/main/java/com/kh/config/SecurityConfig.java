@@ -37,6 +37,7 @@ public class SecurityConfig {
                                 "/api/place/**",
                                 "/api/weather/**",
                                 "/api/cinemas/**"
+
                         ).permitAll()
 
                         // 2. 인증이 필요한 POST 요청을 구체적으로 명시
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
                         .requestMatchers(
                                 "/api/manage/inquiry/**",
+
                                 "/api/bookmarks/**").authenticated()  // 로그인한 유저만 사용가능
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
 
