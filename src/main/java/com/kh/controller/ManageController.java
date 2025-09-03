@@ -7,6 +7,7 @@ import com.kh.service.ManageService;
 import com.kh.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -182,6 +183,13 @@ public class ManageController {
         }
     }
 
+    @GetMapping("/inquiry/list")
+    public List<InquiryDTO> getAllInquiries() {
+        System.out.println("모든 1:1 문의 리스트 가져오기");
+
+        return manageService.getInquiriesList();
+    }
+
     @GetMapping("/inquiry/list/{userno}")
     public List<InquiryDTO> getInquiries(@PathVariable int userno) {
 
@@ -192,6 +200,13 @@ public class ManageController {
     public InquiryDTO getInquiryDetail(@PathVariable int inquiryno) {
         System.out.println("조회할 문의 번호: " + inquiryno);
         return manageService.getInquiryDetail(inquiryno);
+    }
+
+    @PostMapping("/inquiry/reply")
+    public ResponseEntity<?> createInquiryReply(@RequestBody InquiryDTO inquiryDTO){
+        System.out.println("1:1문의(답변)" + inquiryDTO);
+        manageService.insertReply(inquiryDTO);
+        return ResponseEntity.ok("답변완료");
     }
 
 
