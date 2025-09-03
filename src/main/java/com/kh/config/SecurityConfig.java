@@ -46,12 +46,11 @@ public class SecurityConfig {
                         // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
                         .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
+                        .requestMatchers(
+                                "/api/manage/inquiry/**",
+                                "/api/bookmarks/**").authenticated()  // 로그인한 유저만 사용가능
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
 
-                        // 4. 로그인한 유저만 사용가능한 규칙
-                        .requestMatchers("/api/manage/inquiry/**").authenticated()
-
-                        // 5. 그 외 모든 요청은 인증 필요 (가장 마지막에 배치)
-                        .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
