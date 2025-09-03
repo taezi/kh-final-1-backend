@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.mapper.MovieReviewMapper">
+
+    <select id="getReviewsByContent" resultType="com.kh.dto.MovieReviewDTO">
+        SELECT REVIEWNO AS reviewNo,
+        USERNO AS userNo,
+        COMMENTA AS comment,
+        CREATEDAT AS createDat,
+        CONTENTTYPE AS contentType,
+        CONTENTNO AS contentNo FROM REVIEW WHERE CONTENTNO = #{contentNo} ORDER BY CREATEDAT DESC
+    </select>
+
+    <insert id="insertReview">
+        INSERT INTO REVIEW (USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO) VALUES (
+        #{userNo},
+        #{comment}, SYSDATE,
+        #{contentType},
+        #{contentNo}
+        )
+    </insert>
+</mapper>
