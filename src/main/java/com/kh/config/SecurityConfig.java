@@ -40,7 +40,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/editors/**").permitAll() // GET만 허용 나머지는 에디터권한 필요
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
-                        .requestMatchers("/api/manage/inquiry/**").authenticated()  // 로그인한 유저만 사용가능
+                        .requestMatchers(
+                                "/api/manage/inquiry/**",
+                                "/api/bookmarks/**").authenticated()  // 로그인한 유저만 사용가능
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .cors(Customizer.withDefaults())
