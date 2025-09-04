@@ -38,7 +38,8 @@ public class SecurityConfig {
                                 "/api/weather/**",
                                 "/api/cinemas/**"
                         ).permitAll()
-
+                        .requestMatchers(HttpMethod.PUT,
+                        "/api/views/**").permitAll()
                         // 2. 인증이 필요한 POST 요청을 구체적으로 명시
                         .requestMatchers(HttpMethod.POST, "/api/movie/review").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll() // 로그인/회원가입 등

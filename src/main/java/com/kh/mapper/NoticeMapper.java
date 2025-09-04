@@ -27,5 +27,6 @@ public interface NoticeMapper {
     // 공지글 삭제
     void deleteNotice(long noticeno);
 
-
+    // 조회수 증가
+    int incrementView(long noticeno);
 }
