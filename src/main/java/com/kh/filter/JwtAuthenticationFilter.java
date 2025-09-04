@@ -68,5 +68,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
         System.out.println("### JWT Filter: doFilterInternal 종료 - 다음 필터로 전달됨.");
     }
+    private void sendUnauthorizedResponse(HttpServletResponse res, String message) throws IOException {
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        res.setContentType("application/json;charset=UTF-8");
+        res.getWriter().write("{\"error\":\"" + message + "\"}");
+    }
 }
 
