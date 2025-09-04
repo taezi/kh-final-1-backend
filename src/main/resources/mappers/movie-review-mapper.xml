@@ -23,4 +23,20 @@
         INSERT INTO REVIEW (USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO)
         VALUES (#{userNo}, #{commentA}, SYSDATE, #{contentType}, #{contentNo})
     </insert>
+
+
+
+    <update id="updateReview">
+        UPDATE REVIEW
+        SET
+        COMMENTA = #{commentA},
+        MODIFIEDAT = SYSDATE
+        WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
+    </update>
+
+    <delete id="deleteReview">
+        DELETE FROM REVIEW
+        WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
+    </delete>
+
 </mapper>
