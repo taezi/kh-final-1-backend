@@ -1,6 +1,7 @@
 package com.kh.controller;
 
 
+import com.kh.dto.InquiryDTO;
 import com.kh.dto.MemberDTO;
 import com.kh.service.ManageService;
 import com.kh.service.UserService;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RequestMapping("/api/manage")
@@ -154,6 +156,42 @@ public class ManageController {
         map.put("code", 1);
         map.put("msg", "비밀번호 변경에 성공하였습니다. 로그인을 다시 해주세요.");
         return map;
+    }
+
+
+    @PostMapping("/inquiry")
+    public Map<String, Object> createInquiry(@RequestBody InquiryDTO inquiryDTO){
+        Map<String, Object> map = new HashMap<>();
+        System.out.println("문의글 내용 : " + inquiryDTO);
+        try {
+            int result = manageService.insertInquiry(inquiryDTO);
+            if (result > 0) {
+                map.put("code", 1);
+                map.put("msg", "문의가 성공적으로 등록되었습니다.");
+                return map;
+            } else {
+                map.put("code", 2);
+                map.put("msg", "문의 등록에 실패했습니다. (영향받은 행 없음)");
+                return map;
+            }
+        } catch (Exception e) {
+            System.err.println("문의 등록 중 오류 발생: " + e.getMessage());
+            map.put("code", 2);
+            map.put("msg", "문의 등록에 실패했습니다. 다시 시도해 주세요.");
+            return map;
+        }
+    }
+
+    @GetMapping("/inquiry/list/{userno}")
+    public List<InquiryDTO> getInquiries(@PathVariable int userno) {
+
+        return manageService.getInquiriesByUser(userno);
+    }
+
+    @GetMapping("/inquiry/detail/{inquiryno}")
+    public InquiryDTO getInquiryDetail(@PathVariable int inquiryno) {
+        System.out.println("조회할 문의 번호: " + inquiryno);
+        return manageService.getInquiryDetail(inquiryno);
     }
 
 

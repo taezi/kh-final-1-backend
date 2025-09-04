@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -66,17 +68,34 @@ public class RestService {
         }
         return finalRestDto;
     }
-    /**
-     * 특정 지역구에 속한 식당 목록을 조회하는 메서드입니다. (새로 추가됨)
-     * @param region 조회할 지역구 이름
-     * @return 해당 지역구의 식당 목록
+
+    /* 특정 지역구(gu)와 검색어(q)를 사용하여 식당 목록을 페이징하여 조회하는 메서드입니다.
+     * @param gu 조회할 지역구 이름 (선택적)
+     * @param q 조회할 검색어 (선택적)
+     * @param page 페이지 번호
+     * @param size 페이지당 항목 수
+     * @return 조회된 식당 목록과 페이징 정보 (hasMore)
      */
-    public List<RestDto> getRestaurantsByRegion(String region) {
-        // restMapper를 사용하여 특정 지역구의 식당 목록을 가져옵니다.
-        List<RestDto> restaurants = restMapper.findByRegion(region);
+    public Map<String, Object> searchRestaurants(String gu, String q, int page, int size) {
+        // 1. 전체 데이터 수 조회
+        // 이 쿼리를 통해 특정 'gu'와 'q'에 해당하는 전체 식당 수를 가져옵니다.
+        int totalCount = restMapper.countByGuAndQuery(gu, q);
 
-        // 추가적인 비즈니스 로직이 필요하면 여기에 구현할 수 있습니다.
+        // 2. 페이징 처리를 위한 offset 계산 (페이지 번호는 1부터 시작)
+        int offset = (page - 1) * size;
 
-        return restaurants;
+        // 3. 현재 페이지에 해당하는 식당 목록을 가져옵니다.
+        List<RestDto> restaurants = restMapper.findByGuAndQuery(gu, q, offset, size);
+
+        // 4. 다음 페이지가 있는지 확인
+        // (현재 페이지 번호 * 페이지당 항목 수)가 전체 항목 수보다 작으면 다음 페이지가 존재합니다.
+        boolean hasMore = (long) page * size < totalCount;
+
+        // 5. 결과를 맵에 담아 반환합니다.
+        Map<String, Object> result = new HashMap<>();
+        result.put("items", restaurants);
+        result.put("hasMore", hasMore);
+
+        return result;
     }
 }

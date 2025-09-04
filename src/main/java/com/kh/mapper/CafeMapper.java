@@ -31,9 +31,21 @@ public interface CafeMapper {
     CafeDto findByCafeNameAndBranch(@Param("cafeName") String cafeName, @Param("cafeBranch") String cafeBranch);
 
     /**
-     * 특정 지역구에 속한 카페 목록을 조회하는 메서드입니다. (새로 추가됨)
-     * @param region 조회할 지역구 이름
-     * @return 해당 지역구의 카페 목록
+     * 특정 지역구(gu)와 검색어(q)를 사용하여 식당 목록을 페이징하여 조회하는 메서드입니다.
+     * @param gu 조회할 지역구 이름
+     * @param q 조회할 검색어
+     * @param offset 시작 위치 (0부터 시작)
+     * @param size 가져올 항목 수
+     * @return 조건에 맞는 식당 목록
      */
-    List<CafeDto> findByRegion(String region);
+    List<CafeDto> findByGuAndQuery(@Param("gu") String gu, @Param("q") String q,
+                                   @Param("offset") int offset, @Param("size") int size);
+
+    /**
+     * 특정 지역구(gu)와 검색어(q)에 맞는 전체 식당 수를 조회합니다.
+     * @param gu 조회할 지역구 이름
+     * @param q 조회할 검색어
+     * @return 조건에 맞는 전체 식당 수
+     */
+    int countByGuAndQuery(@Param("gu") String gu, @Param("q") String q);
 }

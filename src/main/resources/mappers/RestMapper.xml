@@ -42,17 +42,41 @@
         WHERE RESTNAME = #{restName} AND RESTBRANCH = #{restBranch}
     </select>
 
-    <!-- findByRegion: 특정 지역구에 속한 식당 목록을 조회합니다. (새로 추가됨)
-         WHERE 절에 지역구(RESTREGION) 컬럼을 사용합니다.
-         결과를 RestDtoMap에 매핑합니다. -->
-    <select id="findByRegion" resultMap="RestDtoMap">
+    <select id="findByGuAndQuery" resultMap="RestDtoMap">
         SELECT
-        RESTNAME,
-        RESTBRANCH,
-        RESTIMGADDRESS
+        RESTNO, RESTNAME, RESTBRANCH, RESTIMGADDRESS, RESTREGION,
+        RESTTYPE, RESTOPEN, RESTPHONNUMBER, RESTSUMMARY, RESTWEBSITE,
+        RESTMAPURL
         FROM
         REST
-        WHERE
-        RESTREGION = #{region}
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                RESTREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (RESTNAME LIKE '%' || #{q} || '%' OR RESTBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
+        ORDER BY RESTNO
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <select id="countByGuAndQuery" resultType="int">
+        SELECT COUNT(*)
+        FROM REST
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                RESTREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (RESTNAME LIKE '%' || #{q} || '%' OR RESTBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
     </select>
 </mapper>

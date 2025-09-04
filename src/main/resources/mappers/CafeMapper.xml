@@ -42,17 +42,41 @@
         WHERE CAFENAME = #{cafeName} AND CAFEBRANCH = #{cafeBranch}
     </select>
 
-    <!-- findByRegion: 특정 지역구에 속한 카페 목록을 조회합니다. (새로 추가됨)
-        WHERE 절에 지역구(CAFEREGION) 컬럼을 사용합니다.
-        결과를 CafeDtoMap에 매핑합니다. -->
-    <select id="findByRegion" resultMap="CafeDtoMap">
+    <select id="findByGuAndQuery" resultMap="CafeDtoMap">
         SELECT
-        CAFENAME,
-        CAFEBRANCH,
-        CAFEIMGADDRESS
+        CAFENO, CAFENAME, CAFEBRANCH, CAFEIMGADDRESS, CAFEREGION,
+        CAFETYPE, CAFEOPEN, CAFEPHONNUMBER, CAFESUMMARY, CAFEWEBSITE,
+        CAFEMAPURL
         FROM
         CAFE
-        WHERE
-        CAFEREGION = #{region}
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                CAFEREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (CAFENAME LIKE '%' || #{q} || '%' OR CAFEBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
+        ORDER BY CAFENO
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <select id="countByGuAndQuery" resultType="int">
+        SELECT COUNT(*)
+        FROM CAFE
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                CAFEREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (CAFENAME LIKE '%' || #{q} || '%' OR CAFEBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
     </select>
 </mapper>

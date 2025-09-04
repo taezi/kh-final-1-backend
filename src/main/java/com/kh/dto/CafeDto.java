@@ -20,4 +20,5 @@ public class CafeDto {
     private String cafeRating;
     private String cafeWebsite;
     private String cafeMapUrl;
-}//
+}
+//

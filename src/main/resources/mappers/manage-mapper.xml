@@ -28,6 +28,22 @@
         update member set password= #{encodedAfterPassword} where userid = #{userid}
     </update>
 
+    <insert id="insertInquiry">
+        insert into inquiry(userno, inquirytitle, inquirycontent, phonenumber)
+        values(#{userno}, #{inquiryTitle}, #{inquiryContent}, #{phoneNumber})
+    </insert>
+
+    <select id="getInquiriesByUser" resultType="inquiry">
+        SELECT inquiryno, userno, phonenumber, inquirytitle, inquirycontent,
+        createdat, replycontent, repliedat, status
+        FROM inquiry
+        WHERE userno = #{userno}
+        ORDER BY createdat DESC
+    </select>
+
+    <select id="getInquiryDetail" resultType="inquiry">
+        select * from inquiry where inquiryno = #{inquiryno}
+    </select>
 
 
 

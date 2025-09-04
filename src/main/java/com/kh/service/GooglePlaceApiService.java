@@ -11,13 +11,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Google Places API를 사용하여 카페 정보를 조회하고 DTO로 변환하는 서비스입니다.
+ * Cafe Places API를 사용하여 카페 정보를 조회하고 DTO로 변환하는 서비스입니다.
  * WebClient를 사용하여 논블로킹 방식으로 API를 호출합니다.
  */
 @Service
@@ -29,11 +26,11 @@ public class GooglePlaceApiService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    // application.properties에서 Google Places API 키 주입
+    // application.properties에서 Cafe Places API 키 주입
     @Value("${google.places.api-key}")
     private String googlePlacesApiKey;
 
-    // Google Places API의 엔드포인트 URL
+    // Cafe Places API의 엔드포인트 URL
     private static final String FIND_PLACE_API_URL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json";
     private static final String PLACE_DETAILS_API_URL = "https://maps.googleapis.com/maps/api/place/details/json";
     private static final String PLACE_PHOTO_API_URL = "https://maps.googleapis.com/maps/api/place/photo";
@@ -49,7 +46,7 @@ public class GooglePlaceApiService {
     }
 
     /**
-     * Google Places API를 사용하여 카페 정보를 조회하고 DTO로 변환합니다.
+     * Cafe Places API를 사용하여 카페 정보를 조회하고 DTO로 변환합니다.
      * 데이터베이스에서 이미지를 제외한 다른 정보가 존재하더라도, 이미지 정보가 없을 경우 API를 호출하여 보완합니다.
      * WebClient는 논블로킹 방식으로 동작합니다.
      * @param cafeDtoFromDb 데이터베이스에서 조회된 기존 CafeDto 객체
@@ -75,12 +72,12 @@ public class GooglePlaceApiService {
                     // 2단계: Place Details API를 호출하여 상세 정보를 가져옵니다.
                     return getPlaceDetails(placeId, cafeDtoFromDb);
                 })
-                .doOnError(e -> logger.error("Google Place API 호출 중 오류 발생: {}", e.getMessage(), e))
+                .doOnError(e -> logger.error("Cafe Place API 호출 중 오류 발생: {}", e.getMessage(), e))
                 .onErrorResume(e -> Mono.empty()); // 오류 발생 시 빈 Mono 반환
     }
 
     /**
-     * 지정된 쿼리로 Google Find Place API를 호출하여 place_id를 Mono로 반환합니다.
+     * 지정된 쿼리로 Cafe Find Place API를 호출하여 place_id를 Mono로 반환합니다.
      * @param query 검색어
      * @return 찾은 place_id, 없으면 Mono.empty()
      */
@@ -127,12 +124,11 @@ public class GooglePlaceApiService {
     private Mono<CafeDto> getPlaceDetails(String placeId, CafeDto cafeDtoFromDb) {
         return webClient.get()
                 .uri(uriBuilder -> {
-                    // 전송되는 URL을 로그로 출력
-                    // fields 파라미터에 'editorial_summary'를 추가합니다.
+                    // **1. 'fields' 파라미터에 'geometry'를 추가**하여 위도/경도 정보를 받아옵니다.
                     URI uri = uriBuilder
                             .path("/details/json")
                             .queryParam("place_id", placeId)
-                            .queryParam("fields", "formatted_address,website,photos,rating,name,opening_hours,formatted_phone_number,url,editorial_summary")
+                            .queryParam("fields", "formatted_address,website,photos,rating,name,opening_hours,formatted_phone_number,geometry,editorial_summary")
                             .queryParam("key", googlePlacesApiKey)
                             .queryParam("language", "ko")
                             .build();
@@ -165,9 +161,6 @@ public class GooglePlaceApiService {
                         if (result.has("rating")) {
                             finalCafeDto.setCafeRating(result.path("rating").asText("0"));
                         }
-                        if (result.has("url")) {
-                            finalCafeDto.setCafeMapUrl(result.path("url").asText(""));
-                        }
                         if (result.has("opening_hours") && result.path("opening_hours").has("weekday_text")) {
                             JsonNode openingHours = result.path("opening_hours").path("weekday_text");
                             if (openingHours.isArray() && openingHours.size() > 0) {
@@ -176,6 +169,21 @@ public class GooglePlaceApiService {
                         }
                         if (result.has("formatted_phone_number")) {
                             finalCafeDto.setCafePhonNumber(result.path("formatted_phone_number").asText(""));
+                        }
+
+                        // **2. 지도 임베드 URL 생성 로직 추가**
+                        if (result.has("geometry") && result.path("geometry").has("location")) {
+                            JsonNode location = result.path("geometry").path("location");
+                            double lat = location.path("lat").asDouble();
+                            double lng = location.path("lng").asDouble();
+
+                            // 위도와 경도를 이용해 임베드 URL을 생성합니다.
+                            // `q` 파라미터에 쿼리(`name, address`)를 인코딩하여 추가하면 지도가 더욱 정확해집니다.
+                            String embedUrl = UriComponentsBuilder.fromHttpUrl("https://www.google.com/maps/embed/v1/place")
+                                    .queryParam("key", googlePlacesApiKey)
+                                    .queryParam("q", lat + "," + lng)
+                                    .toUriString();
+                            finalCafeDto.setCafeMapUrl(embedUrl);
                         }
 
                         // 사진 정보 추출 및 설정

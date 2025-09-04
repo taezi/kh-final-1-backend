@@ -34,16 +34,17 @@ public class SecurityConfig {
                                 "/api/place/**",
                                 "/api/weather/**",
                                 "/api/editor/**",
-                                "/api/cafe/**",
-                                "/api/rest/**",
                                 "/api/movies/**",
                                 "/api/cinemas/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cafe/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rest/**").permitAll()
                         .requestMatchers("/api/ai/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // GET만 허용 나머지는 관리자권한 필요
                         .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/editors/**").permitAll() // GET만 허용 나머지는 에디터권한 필요
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
+                        .requestMatchers("/api/manage/inquiry/**").authenticated()  // 로그인한 유저만 사용가능
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .cors(Customizer.withDefaults())

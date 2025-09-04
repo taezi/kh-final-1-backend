@@ -27,7 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             "/api/weather",
             "/api/editor",
-            "/api/cafes",
+            "/api/cafe",
+            "/api/rest",
             "/api/auth/",
             "/api/place/",
             "/api/weather/",

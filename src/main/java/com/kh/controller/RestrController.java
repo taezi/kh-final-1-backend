@@ -20,6 +20,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/rest")
+@CrossOrigin(origins = "http://localhost:3000")
 public class RestrController {
 
     @Autowired
@@ -34,7 +35,7 @@ public class RestrController {
      * @param headers 클라이언트가 보낸 모든 HTTP 헤더. Postman의 인증 헤더를 받기 위해 추가되었습니다.
      * @return 조회된 카페 정보 또는 HTTP 404 Not Found
      */
-    @GetMapping
+    @GetMapping("/info")
     public ResponseEntity<RestDto> getRestInfo(
             @RequestParam String restName,
             @RequestParam String restBranch,
@@ -68,20 +69,35 @@ public class RestrController {
             return ResponseEntity.badRequest().body("카페 정보 업데이트에 실패했습니다. (restNo 확인)");
         }
     }
+
     /**
-     * 특정 지역구에 속한 식당 목록을 조회하는 API 엔드포인트입니다.
-     * 예: GET /api/rest/search?region=강남구
-     *
-     * @param region 조회할 지역구 이름
-     * @return 조회된 식당 목록 또는 HTTP 404 Not Found
+     * 특정 지역구(gu)와 검색어(q)를 사용하여 식당 목록을 조회하는 API 엔드포인트입니다.
+     * 페이징을 위해 페이지 번호(page)와 페이지당 항목 수(size)를 받습니다.
+     * 예: GET /api/rest/search?gu=강남구&q=카페&page=1&size=12
+     * @param gu 조회할 지역구 이름 (선택적)
+     * @param q 조회할 검색어 (선택적)
+     * @param page 페이지 번호 (기본값: 1)
+     * @param size 페이지당 항목 수 (기본값: 12)
+     * @return 조회된 식당 목록과 페이징 정보가 담긴 응답
      */
-    @GetMapping("/search") // 새로운 엔드포인트 추가
-    public ResponseEntity<List<RestDto>> searchRestaurantsByRegion(@RequestParam("region") String region) {
-        List<RestDto> restaurants = restService.getRestaurantsByRegion(region);
-        if (!restaurants.isEmpty()) {
-            return ResponseEntity.ok(restaurants);
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchRestaurants(
+            @RequestParam(value = "gu", required = false) String gu,
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size) {
+
+        // restService에서 페이징된 데이터를 가져옵니다.
+        Map<String, Object> result = restService.searchRestaurants(gu, q, page, size);
+
+        // 결과가 비어있지 않으면 200 OK와 함께 데이터를 반환합니다.
+        if (result != null && !((List<RestDto>) result.get("items")).isEmpty()) {
+            return ResponseEntity.ok(result);
         } else {
-            return ResponseEntity.notFound().build();
+            // 결과가 없으면 빈 리스트와 hasMore를 false로 반환하여 프론트엔드에서 처리할 수 있게 합니다.
+            result.put("items", List.of());
+            result.put("hasMore", false);
+            return ResponseEntity.ok(result);
         }
     }
 }

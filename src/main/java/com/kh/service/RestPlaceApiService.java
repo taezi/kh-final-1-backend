@@ -127,12 +127,11 @@ public class RestPlaceApiService {
     private Mono<RestDto> getPlaceDetails(String placeId, RestDto restDtoFromDb) {
         return webClient.get()
                 .uri(uriBuilder -> {
-                    // 전송되는 URL을 로그로 출력
-                    // fields 파라미터에 'editorial_summary'를 추가합니다.
+                    // **1. 'fields' 파라미터에 'geometry'를 추가**하여 위도/경도 정보를 받아옵니다.
                     URI uri = uriBuilder
                             .path("/details/json")
                             .queryParam("place_id", placeId)
-                            .queryParam("fields", "formatted_address,website,photos,rating,name,opening_hours,formatted_phone_number,url,editorial_summary")
+                            .queryParam("fields", "formatted_address,website,photos,rating,name,opening_hours,formatted_phone_number,geometry,editorial_summary")
                             .queryParam("key", googlePlacesApiKey)
                             .queryParam("language", "ko")
                             .build();
@@ -165,9 +164,6 @@ public class RestPlaceApiService {
                         if (result.has("rating")) {
                             finalRestDto.setRestRating(result.path("rating").asText("0"));
                         }
-                        if (result.has("url")) {
-                            finalRestDto.setRestMapUrl(result.path("url").asText(""));
-                        }
                         if (result.has("opening_hours") && result.path("opening_hours").has("weekday_text")) {
                             JsonNode openingHours = result.path("opening_hours").path("weekday_text");
                             if (openingHours.isArray() && openingHours.size() > 0) {
@@ -176,6 +172,21 @@ public class RestPlaceApiService {
                         }
                         if (result.has("formatted_phone_number")) {
                             finalRestDto.setRestPhonNumber(result.path("formatted_phone_number").asText(""));
+                        }
+
+                        // **2. 지도 임베드 URL 생성 로직 추가**
+                        if (result.has("geometry") && result.path("geometry").has("location")) {
+                            JsonNode location = result.path("geometry").path("location");
+                            double lat = location.path("lat").asDouble();
+                            double lng = location.path("lng").asDouble();
+
+                            // 위도와 경도를 이용해 임베드 URL을 생성합니다.
+                            // `q` 파라미터에 쿼리(`name, address`)를 인코딩하여 추가하면 지도가 더욱 정확해집니다.
+                            String embedUrl = UriComponentsBuilder.fromHttpUrl("https://www.google.com/maps/embed/v1/place")
+                                    .queryParam("key", googlePlacesApiKey)
+                                    .queryParam("q", lat + "," + lng)
+                                    .toUriString();
+                            finalRestDto.setRestMapUrl(embedUrl);
                         }
 
                         // 사진 정보 추출 및 설정
