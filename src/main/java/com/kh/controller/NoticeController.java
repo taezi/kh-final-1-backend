@@ -71,4 +71,6 @@ public class NoticeController {
         noticeService.deleteNotice(noticeno);
         return ResponseEntity.ok("삭제 완료");
     }
+
+
 }
