@@ -31,7 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. 모든 GET 요청에 대한 permitAll 규칙들을 먼저 배치
                         .requestMatchers(HttpMethod.GET,
-                                "/api/movie/**",
+                                "/api/movie/review/**",
+                                "/api/movies/**",
                                 "/api/notices/**",
                                 "/api/editors/**",
                                 "/api/place/**",
@@ -41,7 +42,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // 2. 인증이 필요한 POST 요청을 구체적으로 명시
-                        .requestMatchers(HttpMethod.POST, "/api/movie/review").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/movie/review/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll() // 로그인/회원가입 등
 
                         // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
