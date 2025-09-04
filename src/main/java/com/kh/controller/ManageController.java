@@ -183,12 +183,14 @@ public class ManageController {
         }
     }
 
+
     @GetMapping("/inquiry/list")
     public List<InquiryDTO> getAllInquiries() {
         System.out.println("모든 1:1 문의 리스트 가져오기");
 
         return manageService.getInquiriesList();
     }
+
 
     @GetMapping("/inquiry/list/{userno}")
     public List<InquiryDTO> getInquiries(@PathVariable int userno) {
@@ -202,12 +204,14 @@ public class ManageController {
         return manageService.getInquiryDetail(inquiryno);
     }
 
+
     @PostMapping("/inquiry/reply")
     public ResponseEntity<?> createInquiryReply(@RequestBody InquiryDTO inquiryDTO){
         System.out.println("1:1문의(답변)" + inquiryDTO);
         manageService.insertReply(inquiryDTO);
         return ResponseEntity.ok("답변완료");
     }
+
 
 
 }

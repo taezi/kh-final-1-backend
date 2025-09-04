@@ -37,6 +37,8 @@ public class SecurityConfig {
                                 "/api/editors/**",
                                 "/api/place/**",
                                 "/api/weather/**",
+                                "/api/cafe/**",
+                                "/api/rest/**", 
                                 "/api/cinemas/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.PUT,
@@ -46,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll() // 로그인/회원가입 등
 
                         // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
+
                         .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
                         .requestMatchers(

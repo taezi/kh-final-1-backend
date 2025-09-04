@@ -51,9 +51,11 @@ public class EditorService {
         return editorMapper.findEditors(params);
     }
 
+
     // 조회수 증가
     public boolean incrementView(long editorno) {
         int updated = editorMapper.incrementView(editorno);
         return updated > 0;
     }
+
 }

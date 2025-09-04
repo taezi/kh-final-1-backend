@@ -27,6 +27,8 @@ public interface EditorMapper {
     //검색
     List<EditorDTO> findEditors(Map<String, Object> params);
 
+
     // 조회수 증가
     int incrementView(long editorno);
+
 }

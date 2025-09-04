@@ -24,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
@@ -39,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String id = jwtTokenProvider.getUseridFromToken(token);
                 String rolesString = jwtTokenProvider.getRolesFromToken(token);
 
+
                 List<SimpleGrantedAuthority> authorities;
                 if (rolesString != null && !rolesString.isEmpty()) {
                     authorities = Arrays.stream(rolesString.split(","))
@@ -50,7 +52,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(id, null, authorities);
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
                 System.out.println("### JWT Filter: 인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
             } else {
                 System.out.println("### JWT Filter: 유효하지 않은 토큰 감지.");
@@ -59,15 +63,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }else {
             System.out.println("### JWT Filter: Authorization 헤더 없음 또는 Bearer 토큰 아님. 다음 필터로 진행.");
-        }
 
+        }
         chain.doFilter(req, res);
         System.out.println("### JWT Filter: doFilterInternal 종료 - 다음 필터로 전달됨.");
     }
-
-    private void sendUnauthorizedResponse(HttpServletResponse res, String message) throws IOException {
-        res.setStatus(HttpStatus.UNAUTHORIZED.value());
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write("{\"error\":\"" + message + "\"}");
-    }
 }
+

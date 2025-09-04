@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.mapper.CafeMapper">
+    <!-- CafeDto와 DB 컬럼을 매핑하는 resultMap.
+         여기에 정의된 컬럼만 DTO와 매핑됩니다. -->
+    <resultMap id="CafeDtoMap" type="com.kh.dto.CafeDto">
+        <id property="cafeNo" column="CAFENO"/>
+        <result property="cafeName" column="CAFENAME"/>
+        <result property="cafeBranch" column="CAFEBRANCH"/>
+        <result property="cafeRegion" column="CAFEREGION"/>
+        <result property="cafeImgAddress" column="CAFEIMGADDRESS"/>
+        <result property="cafeType" column="CAFETYPE"/>
+        <result property="cafeOpen" column="CAFEOPEN"/>
+        <result property="cafePhonNumber" column="CAFEPHONNUMBER"/>
+        <result property="cafeSummary" column="CAFESUMMARY"/>
+        <result property="cafeWebsite" column="CAFEWEBSITE"/>
+        <result property="cafeMapUrl" column="CAFEMAPURL"/>
+    </resultMap>
+
+    <!-- updateCafe: 기존 카페 정보를 업데이트합니다.
+         WHERE 절에 고유한 PK인 cafeNo를 사용하여 특정 레코드를 정확하게 업데이트합니다.
+         만약 cafeAddress 필드가 DTO에 없다면 제거해야 합니다. -->
+    <!-- updateCafe 쿼리 -->
+    <update id="updateCafe" parameterType="com.kh.dto.CafeDto">
+        UPDATE CAFE
+        SET
+        CAFEIMGADDRESS = #{cafeImgAddress},
+        CAFEOPEN = #{cafeOpen},
+        CAFEPHONNUMBER = #{cafePhonNumber},
+        CAFEWEBSITE = #{cafeWebsite},
+        CAFEMAPURL = #{cafeMapUrl}
+        WHERE CAFENAME = #{cafeName} and CAFEBRANCH = #{cafeBranch}
+    </update>
+
+    <!-- findByCafeNameAndBranch: 카페 이름과 지점명을 기준으로 정보를 조회합니다.
+         결과를 CafeDtoMap에 매핑합니다. -->
+    <select id="findByCafeNameAndBranch" resultMap="CafeDtoMap">
+        SELECT *
+        FROM CAFE
+        WHERE CAFENAME = #{cafeName} AND CAFEBRANCH = #{cafeBranch}
+    </select>
+
+    <select id="findByGuAndQuery" resultMap="CafeDtoMap">
+        SELECT
+        CAFENO, CAFENAME, CAFEBRANCH, CAFEIMGADDRESS, CAFEREGION,
+        CAFETYPE, CAFEOPEN, CAFEPHONNUMBER, CAFESUMMARY, CAFEWEBSITE,
+        CAFEMAPURL
+        FROM
+        CAFE
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                CAFEREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (CAFENAME LIKE '%' || #{q} || '%' OR CAFEBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
+        ORDER BY CAFENO
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <select id="countByGuAndQuery" resultType="int">
+        SELECT COUNT(*)
+        FROM CAFE
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                CAFEREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (CAFENAME LIKE '%' || #{q} || '%' OR CAFEBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
+    </select>
+</mapper>
