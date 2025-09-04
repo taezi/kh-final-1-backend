@@ -25,4 +25,14 @@ public class UserService {
     public MemberDTO findByUsername(String beforeUsername) {
         return userMapper.findByUsername(beforeUsername);
     }
+
+    public MemberDTO findIdByUserInfo(String username, String nickname) {
+        return userMapper.findIdByUserInfo(username, nickname);
+    }
+
+    public MemberDTO findForPwd(String userid, String username, String nickname) {
+        return userMapper.findForPwd(userid, username, nickname);
+    }
+
+
 }
