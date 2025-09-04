@@ -5,6 +5,8 @@ import com.kh.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -24,5 +26,13 @@ public class UserService {
 
     public MemberDTO findByUsername(String beforeUsername) {
         return userMapper.findByUsername(beforeUsername);
+    }
+
+    public List<MemberDTO> selectAllUser() {
+        return userMapper.selectAllUser();
+    }
+
+    public int deleteUserByUserno(Long userno) {
+        return userMapper.deleteUserByUserno(userno);
     }
 }
