@@ -44,7 +44,12 @@ public class NoticeService {
     public void deleteNotice(long noticeno) {
         noticeMapper.deleteNotice(noticeno);
     }
+
+    public boolean incrementView(long noticeno) {
+        int update = noticeMapper.incrementView(noticeno);
+        return update > 0;
     }
+}
 
 
 

@@ -45,4 +45,11 @@
         WHERE noticeno = #{noticeno}
     </delete>
 
+    <!--  조회수 증가 -->
+    <update id="incrementView" parameterType="long">
+        UPDATE NOTICE
+        SET noticeview = noticeview + 1
+        WHERE noticeno = #{noticeno}
+    </update>
+
 </mapper>

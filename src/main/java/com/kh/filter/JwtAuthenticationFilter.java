@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -22,34 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    // SecurityConfig의 permitAll과 정확히 일치하도록 수정
-    private static final List<String> PUBLIC_PATHS = List.of(
-
-            "/api/weather",
-            "/api/editor",
-            "/api/cafe",
-            "/api/rest",
-            "/api/auth/",
-            "/api/place/",
-            "/api/weather/",
-            "/api/movies/",
-            "/api/cinemas/"
-    );
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        System.out.println("shouldNotFilter : "+path);
-        // OPTIONS(CORS preflight) 패스
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
-
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
-        System.out.println(req.getContextPath());
+
+        System.out.println("### JWT Filter: doFilterInternal 시작 - 경로: " + req.getServletPath() + ", 메소드: " + req.getMethod());
+
         String auth = req.getHeader("Authorization");
 
         if (auth != null && auth.startsWith("Bearer ")) {
@@ -57,36 +38,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtTokenProvider.validateToken(token)) {
                 String id = jwtTokenProvider.getUseridFromToken(token);
-                String roles = jwtTokenProvider.getRolesFromToken(token);
+                String rolesString = jwtTokenProvider.getRolesFromToken(token);
 
-                // Spring Security가 인식할 수 있는 권한 객체로 변환
-                List<SimpleGrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority(roles));
 
-                // 인증 객체 생성 후 SecurityContextHolder에 저장
+                List<SimpleGrantedAuthority> authorities;
+                if (rolesString != null && !rolesString.isEmpty()) {
+                    authorities = Arrays.stream(rolesString.split(","))
+                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.trim().toUpperCase()))
+                            .collect(Collectors.toList());
+                } else {
+                    authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                }
+
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(id, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                /////
 
-
-                // 컨트롤러에서 꺼내 쓰도록 request attribute로 전달
-                req.setAttribute("authenticatedUserid", id);
-                req.setAttribute("authenticatedRoles", roles);
+                System.out.println("### JWT Filter: 인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
             } else {
-                res.setStatus(HttpStatus.UNAUTHORIZED.value());
-                res.setContentType("application/json;charset=UTF-8");
-                res.getWriter().write("{\"message\":\"권한 없음: 유효하지 않거나 토큰이 없습니다\"}");
+                System.out.println("### JWT Filter: 유효하지 않은 토큰 감지.");
+                sendUnauthorizedResponse(res, "유효하지 않은 토큰입니다");
                 return;
             }
-        } else {
-            res.setStatus(HttpStatus.UNAUTHORIZED.value());
-            res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("{\"message\":\"권한 없음: 토큰이 없습니다\"}");
-            return;
+        }else {
+            System.out.println("### JWT Filter: Authorization 헤더 없음 또는 Bearer 토큰 아님. 다음 필터로 진행.");
+
         }
         chain.doFilter(req, res);
+        System.out.println("### JWT Filter: doFilterInternal 종료 - 다음 필터로 전달됨.");
     }
 }
 

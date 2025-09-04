@@ -49,4 +49,14 @@ public class ManageService {
     public InquiryDTO getInquiryDetail(int inquiryno) {
         return mapper.getInquiryDetail(inquiryno);
     }
+
+
+    public List<InquiryDTO> getInquiriesList() {
+        return mapper.getInquiriesList();
+    }
+
+    public int insertReply(InquiryDTO inquiryDTO) {
+        return mapper.insertReply(inquiryDTO);
+    }
+
 }

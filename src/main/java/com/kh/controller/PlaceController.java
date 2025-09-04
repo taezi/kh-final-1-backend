@@ -1,6 +1,7 @@
 // src/main/java/com/kh/controller/PlaceController.java
 package com.kh.controller;
 
+import com.kh.dto.BookmarkDTO;
 import com.kh.dto.CalendarResponse;
 import com.kh.dto.EventDto;
 import com.kh.dto.EventListResponse;
@@ -8,6 +9,7 @@ import com.kh.service.EventCsvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -69,4 +71,7 @@ public class PlaceController {
         int n = svc.reload();
         return Map.of("reloaded", n);
     }
+
+
+
 }

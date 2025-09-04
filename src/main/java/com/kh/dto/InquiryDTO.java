@@ -11,8 +11,8 @@ import org.apache.ibatis.type.Alias;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InquiryDTO {
-    private long userno;
-    private long inquiryno;
+    private Long userno;
+    private Long inquiryno;
     private String inquiryTitle;
     private String inquiryContent;
     private String createdAt;

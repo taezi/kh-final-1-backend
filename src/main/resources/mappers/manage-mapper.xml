@@ -46,6 +46,18 @@
     </select>
 
 
+    <select id="getInquiriesList" resultType="inquiry">
+        select * from inquiry
+    </select>
+
+    <update id="insertReply">
+        update inquiry set
+        replycontent = #{replyContent , jdbcType=VARCHAR},
+        repliedat = sysdate,
+        status = 'replied'
+        where inquiryno = #{inquiryno , jdbcType=NUMERIC}
+    </update>
+
 
 
 

@@ -25,4 +25,10 @@ public interface ManageMapper {
 
 
     InquiryDTO getInquiryDetail(int inquiryno);
+
+    List<InquiryDTO> getInquiriesList();
+
+
+    int insertReply(InquiryDTO inquiryDTO);
+
 }

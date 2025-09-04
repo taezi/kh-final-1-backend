@@ -108,4 +108,6 @@ public class EditorController {
         result.put("fileUrl", "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + key);
         return ResponseEntity.ok(result);
     }
+
+
 }
