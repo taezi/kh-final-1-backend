@@ -3,6 +3,12 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kh.mapper.UserMapper">
+
+    <insert id="registerUser">
+        insert into member(userid,username,password,email,nickname,role)
+        values(#{userid},#{username},#{password},#{email},#{nickname},#{role})
+    </insert>
+
     <select id="findByUserid" resultType="member">
         select * from member
         where userid = #{userid}
@@ -11,9 +17,47 @@
         select * from member
         where userno = #{userno}
     </select>
-    <!-- 트리거로 id 값 자동 생성   -->
-    <insert id="registerUser">
-        insert into member(userid,username,password,email,nickname,role)
-        values(#{userid},#{username},#{password},#{email},#{nickname},#{role})
-    </insert>
+
+    <select id="findByUsername" resultType="member">
+        select * from member
+        where username = #{beforeUsername}
+    </select>
+
+
+
+    <select id="findByUserno" resultType="member">
+        select * from member
+        where userno = #{userno}
+    </select>
+
+    <select id="findIdByUserInfo" parameterType="map" resultType="member">
+        SELECT userno, userid, username, password, email, nickname, joindate, role
+        FROM member
+        WHERE username = #{username}
+        AND nickname = #{nickname}
+    </select>
+
+
+    <select id="findForPwd" parameterType="map" resultType="member">
+        SELECT userno, userid, username, password, email, nickname, joindate, role
+        FROM member
+        WHERE UPPER(TRIM(userid))   = UPPER(TRIM(#{userid}))
+        AND UPPER(TRIM(username)) = UPPER(TRIM(#{username}))
+        AND UPPER(TRIM(nickname)) = UPPER(TRIM(#{nickname}))
+    </select>
+
+
+
+    <select id="selectAllUser" resultType="member">
+        select * from member
+        where role = 'user'
+    </select>
+
+
+    <delete id="deleteUserByUserno">
+        delete from member
+        where userno = #{userno}
+    </delete>
+
+
 </mapper>

@@ -12,10 +12,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -58,6 +61,7 @@ public class AuthController {
         Cookie cookie = new Cookie("refreshToken", refresh);
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // prod: true (HTTPS)
+//        cookie.setAttribute("SameSite", "Strict"); 배포시 위에랑 같이 변경
         cookie.setPath("/");
         cookie.setMaxAge((int)(jwt.getRefreshTokenExpirationMs()/1000));
         res.addCookie(cookie);
@@ -68,7 +72,8 @@ public class AuthController {
 
     /** Access 만료 시 호출: 쿠키의 refreshToken으로 Access 재발급 */
     @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(HttpServletRequest req) {
+    public ResponseEntity<JwtResponse> refresh(HttpServletRequest req , HttpServletResponse res) {
+        System.out.println("==== REFRESH TOKEN 요청 들어옴 ====");
         String refresh = Arrays.stream(Optional.ofNullable(req.getCookies()).orElse(new Cookie[0]))
                 .filter(c -> "refreshToken".equals(c.getName()))
                 .findFirst().map(Cookie::getValue).orElse(null);
@@ -83,8 +88,19 @@ public class AuthController {
         System.out.println(user);
 
 
+        //  새 Access Token & Refresh Token 발급
         String newAccess = jwt.generateAccessToken(user);
-        return ResponseEntity.ok(new JwtResponse(newAccess, null, "Bearer", user));
+        String newRefresh = jwt.generateRefreshToken(user);
+
+        // 새 Refresh Token 쿠키로 내려주기
+        Cookie cookie = new Cookie("refreshToken", newRefresh);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); //  운영 배포 시 true로 변경
+        cookie.setPath("/");
+        cookie.setMaxAge((int)(jwt.getRefreshTokenExpirationMs() / 1000));
+        res.addCookie(cookie);
+
+        return ResponseEntity.ok(new JwtResponse(newAccess, newRefresh, "Bearer", user));
     }
 
     @PostMapping("/logout")
@@ -100,11 +116,26 @@ public class AuthController {
 
     /** 보호된 API: 필터가 넣어준 attribute 사용 */
     @GetMapping("/user-data")
-    public ResponseEntity<MemberDTO> getUserData(HttpServletRequest req){
-        String userno = (String) req.getAttribute("authenticatedUserid");
+    public ResponseEntity<MemberDTO> getUserData(@AuthenticationPrincipal String userId){
+        String userno = userId;
         if (userno == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/duplicate-check")
+    public Map<String, Object> duplicateCheck(@RequestParam("userid") String userid){
+        System.out.println("aaaaaaa"+userid);
+        Map<String, Object> map = new HashMap<>();
+        boolean isAvailable = userService.findByUserid(userid) == null;
+        map.put("isAvailable", isAvailable);
+        if(isAvailable){
+            map.put("msg", "사용 가능한 아이디입니다.");
+        } else {
+            map.put("msg", "이미 사용 중인 아이디입니다.");
+        }
+
+        return map;
     }
 }

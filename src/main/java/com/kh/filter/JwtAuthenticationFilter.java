@@ -1,6 +1,7 @@
 package com.kh.filter;
 
 import com.kh.util.JwtTokenProvider;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -22,58 +25,59 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/place/**"
-    );
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        // OPTIONS(CORS preflight) 패스
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
+
+        System.out.println("### JWT Filter: doFilterInternal 시작 - 경로: " + req.getServletPath() + ", 메소드: " + req.getMethod());
+
         String auth = req.getHeader("Authorization");
 
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);
 
-            if (jwtTokenProvider.validateToken(token)) {
-                String id = jwtTokenProvider.getUseridFromToken(token);
-                String roles = jwtTokenProvider.getRolesFromToken(token);
+            try {
+                if (jwtTokenProvider.validateToken(token)) {
+                    String id = jwtTokenProvider.getUseridFromToken(token);
+                    String rolesString = jwtTokenProvider.getRolesFromToken(token);
 
-                // Spring Security가 인식할 수 있는 권한 객체로 변환
-                List<SimpleGrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority(roles));
+                    List<SimpleGrantedAuthority> authorities;
+                    if (rolesString != null && !rolesString.isEmpty()) {
+                        authorities = Arrays.stream(rolesString.split(","))
+                                .map(role -> new SimpleGrantedAuthority(role.trim()))
+                                .collect(Collectors.toList());
+                    } else {
+                        authorities = List.of(new SimpleGrantedAuthority("user"));
+                    }
 
-                // 인증 객체 생성 후 SecurityContextHolder에 저장
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(id, null, authorities);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(id, null, authorities);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                /////
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-
-                // 컨트롤러에서 꺼내 쓰도록 request attribute로 전달
-                req.setAttribute("authenticatedUserid", id);
-                req.setAttribute("authenticatedRoles", roles);
-            } else {
-                res.setStatus(HttpStatus.UNAUTHORIZED.value());
-                res.setContentType("application/json;charset=UTF-8");
-                res.getWriter().write("{\"message\":\"권한 없음: 유효하지 않거나 토큰이 없습니다\"}");
+                    System.out.println("### JWT Filter: 인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
+                } else {
+                    System.out.println("### JWT Filter: 유효하지 않은 토큰 감지");
+                    sendUnauthorizedResponse(res, "유효하지 않은 토큰입니다.");
+                    return;
+                }
+            } catch (ExpiredJwtException e) {
+                System.out.println("### JWT Filter: 토큰 만료 감지");
+                sendUnauthorizedResponse(res, "Access Token이 만료되었습니다.");
                 return;
             }
         } else {
-            res.setStatus(HttpStatus.UNAUTHORIZED.value());
-            res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("{\"message\":\"권한 없음: 토큰이 없습니다\"}");
-            return;
+            System.out.println("### JWT Filter: Authorization 헤더 없음 또는 Bearer 토큰 아님. 다음 필터로 진행.");
         }
+
         chain.doFilter(req, res);
+        System.out.println("### JWT Filter: doFilterInternal 종료 - 다음 필터로 전달됨.");
+    }
+
+    private void sendUnauthorizedResponse(HttpServletResponse res, String message) throws IOException {
+        res.setStatus(HttpStatus.UNAUTHORIZED.value()); // ✅ 무조건 401로 통일
+        res.setContentType("application/json;charset=UTF-8");
+        res.getWriter().write("{\"error\":\"" + message + "\"}");
     }
 }
 
