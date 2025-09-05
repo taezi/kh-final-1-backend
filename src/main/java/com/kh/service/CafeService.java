@@ -40,6 +40,31 @@ public class CafeService {
         // 업데이트된 행의 수가 1이면 성공으로 간주
         return cafeMapper.updateCafe(cafeDto) == 1;
     }
+    public CafeDto getCafeByNo(int cafeNo) {
+        // 1. 데이터베이스에서 cafeNo를 기준으로 카페 정보를 조회합니다.
+        CafeDto cafeFromDb = cafeMapper.findByCafeNo(cafeNo);
+
+        // 2. DB에 정보가 없거나, 이미지가 없는 경우에만 외부 API를 호출하여 정보를 보완합니다.
+        if (cafeFromDb == null || cafeFromDb.getCafeImgAddress() == null || cafeFromDb.getCafeImgAddress().isEmpty()) {
+            if (cafeFromDb != null) {
+                // Google API는 cafeName과 cafeBranch를 사용하므로, DB에서 가져온 값을 전달
+                CafeDto finalCafeDto = googlePlaceApiService
+                        .getCafeDetails(cafeFromDb, cafeFromDb.getCafeName(), cafeFromDb.getCafeBranch())
+                        .block();
+
+                if (finalCafeDto != null) {
+                    // API 호출로 정보가 보완되었으면 DB에 업데이트
+                    finalCafeDto.setCafeNo(cafeFromDb.getCafeNo()); // PK 설정
+                    cafeMapper.updateCafe(finalCafeDto);
+                    return finalCafeDto;
+                }
+            }
+            return cafeFromDb; // API 호출 실패 또는 DB에 데이터 자체가 없는 경우
+        }
+
+        // 3. DB에 이미 정보와 이미지가 모두 있는 경우 그대로 반환
+        return cafeFromDb;
+    }
 
     /**
      * 카페 이름과 지점명을 기준으로 카페 정보를 조회하고, 이미지가 없을 경우 Google API를 통해 정보를 보완합니다.
@@ -47,6 +72,7 @@ public class CafeService {
      * @param cafeBranch 조회할 카페의 지점명
      * @return 최종적으로 조회되거나 보완된 카페 정보
      */
+
     public CafeDto getCafeByNameAndBranch(String cafeName, String cafeBranch) throws UnsupportedEncodingException {
         // 1. 데이터베이스에서 먼저 카페 정보를 조회합니다.
         CafeDto cafeFromDb = cafeMapper.findByCafeNameAndBranch(cafeName, cafeBranch);
@@ -60,10 +86,6 @@ public class CafeService {
                 // 기존 데이터가 있으면 업데이트
                 finalCafeDto.setCafeNo(cafeFromDb.getCafeNo()); // PK 설정
                 cafeMapper.updateCafe(finalCafeDto);
-            } else {
-                // 기존 데이터가 없으면 새로 추가
-                // cafeMapper.insertCafe(finalCafeDto);
-                // 삽입 로직은 필요에 따라 추가
             }
         }
         return finalCafeDto;
