@@ -1,13 +1,14 @@
 package com.kh.util;
 
 import com.kh.dto.MemberDTO;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
@@ -22,7 +23,9 @@ public class JwtTokenProvider {
     private Key key;
 
     @PostConstruct
-    public void init() { this.key = Keys.hmacShaKeyFor(secretKey.getBytes()); }
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     public String generateAccessToken(MemberDTO user) {
         Date now = new Date();
@@ -58,7 +61,11 @@ public class JwtTokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            System.out.println("### Access Token 만료됨");
+            throw e; // 만료는 따로 던져줌
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("### 유효하지 않은 토큰: " + e.getMessage());
             return false;
         }
     }

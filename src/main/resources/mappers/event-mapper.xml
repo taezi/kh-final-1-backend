@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.mapper.EventMapper">
+
+    <!-- DB 컬럼명 == DTO 프로퍼티명 매핑 -->
+    <resultMap id="EventMap" type="com.kh.dto.EventDto">
+        <id     property="cultureNo"          column="CULUTENO"/>
+        <result property="category"           column="CATEGORY"/>
+        <result property="district"           column="DISTRICT"/>
+        <result property="cultureName"        column="CULUTENAME"/>
+        <result property="cultureAddress"     column="CULTUREADDRESS"/>
+        <result property="organizationName"   column="ORGANIZATIONNAME"/>
+        <result property="targetAudience"     column="TARGETAUDIENCE"/>
+        <result property="fee"                column="FEE"/>
+        <result property="description"        column="DESCRIPTION"/>
+        <result property="thumbnailImage"     column="THUMBNAILIMAGE"/>
+        <result property="portalUrl"          column="PORTALURL"/>
+        <result property="isFree"             column="ISFREE"/>
+        <result property="startDate"          column="STARTDATE"/>
+        <result property="endDate"            column="ENDDATE"/>
+    </resultMap>
+
+    <!-- 공통 SELECT (가급적 가공 최소화, DATE는 TRUNC로 비교) -->
+    <sql id="BaseSelect">
+        SELECT
+        CULUTENO,
+        CATEGORY,
+        DISTRICT,
+        CULUTENAME,
+        CULTUREADDRESS,
+        ORGANIZATIONNAME,
+        TARGETAUDIENCE,
+        FEE,
+        DESCRIPTION,
+        THUMBNAILIMAGE,
+        PORTALURL,
+        ISFREE,
+        TRUNC(STARTDATE) AS STARTDATE,
+        TRUNC(ENDDATE)   AS ENDDATE
+        FROM CULTURE_EVENT
+    </sql>
+
+    <!-- 목록: 특정 날짜가 범위 내에 포함 -->
+    <select id="selectPagedByDate" resultMap="EventMap">
+        <include refid="BaseSelect"/>
+        WHERE TRUNC(STARTDATE) &lt;= #{date}
+        AND TRUNC(ENDDATE)   &gt;= #{date}
+
+        <if test="district != null and district != ''">
+            AND DISTRICT = #{district}
+        </if>
+
+        <if test="q != null and q != ''">
+            AND (
+            LOWER(CULUTENAME)        LIKE '%' || LOWER(#{q}) || '%'
+            OR LOWER(DESCRIPTION)       LIKE '%' || LOWER(#{q}) || '%'
+            OR LOWER(ORGANIZATIONNAME)  LIKE '%' || LOWER(#{q}) || '%'
+            )
+        </if>
+
+        ORDER BY STARTDATE DESC NULLS LAST, CULUTENAME
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 카운트 (listByDate에서 사용) -->
+    <select id="countByDate" resultType="int">
+        SELECT COUNT(1)
+        FROM (
+        <include refid="BaseSelect"/>
+        WHERE TRUNC(STARTDATE) &lt;= #{date}
+        AND TRUNC(ENDDATE)   &gt;= #{date}
+
+        <if test="district != null and district != ''">
+            AND DISTRICT = #{district}
+        </if>
+
+        <if test="q != null and q != ''">
+            AND (
+            LOWER(CULUTENAME)        LIKE '%' || LOWER(#{q}) || '%'
+            OR LOWER(DESCRIPTION)       LIKE '%' || LOWER(#{q}) || '%'
+            OR LOWER(ORGANIZATIONNAME)  LIKE '%' || LOWER(#{q}) || '%'
+            )
+        </if>
+        )
+    </select>
+
+    <!-- 추천/대표 섹션: 기간 교집합 + LIMIT -->
+    <select id="selectFeatured" resultMap="EventMap">
+        <include refid="BaseSelect"/>
+        WHERE TRUNC(ENDDATE)   &gt;= #{from}
+        AND TRUNC(STARTDATE) &lt;= #{to}
+
+        <if test="district != null and district != ''">
+            AND DISTRICT = #{district}
+        </if>
+
+        ORDER BY STARTDATE
+        FETCH FIRST #{limit} ROWS ONLY
+    </select>
+
+    <!-- 캘린더: 기간 교집합, 필터/검색 포함 -->
+    <select id="selectBetween" resultMap="EventMap">
+        <include refid="BaseSelect"/>
+        WHERE TRUNC(ENDDATE)   &gt;= #{from}
+        AND TRUNC(STARTDATE) &lt;= #{to}
+
+        <if test="district != null and district != ''">
+            AND DISTRICT = #{district}
+        </if>
+
+        <if test="q != null and q != ''">
+            AND (
+            LOWER(CULUTENAME)        LIKE '%' || LOWER(#{q}) || '%'
+            OR LOWER(DESCRIPTION)       LIKE '%' || LOWER(#{q}) || '%'
+            OR LOWER(ORGANIZATIONNAME)  LIKE '%' || LOWER(#{q}) || '%'
+            )
+        </if>
+        ORDER BY STARTDATE
+    </select>
+
+    <select id="selectById" resultMap="EventMap">
+        <include refid="BaseSelect"/>
+        WHERE CULUTENO = #{id}
+    </select>
+
+
+
+</mapper>

@@ -7,6 +7,7 @@ import com.kh.service.ManageService;
 import com.kh.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -182,6 +183,15 @@ public class ManageController {
         }
     }
 
+
+    @GetMapping("/inquiry/list")
+    public List<InquiryDTO> getAllInquiries() {
+        System.out.println("모든 1:1 문의 리스트 가져오기");
+
+        return manageService.getInquiriesList();
+    }
+
+
     @GetMapping("/inquiry/list/{userno}")
     public List<InquiryDTO> getInquiries(@PathVariable int userno) {
 
@@ -193,6 +203,59 @@ public class ManageController {
         System.out.println("조회할 문의 번호: " + inquiryno);
         return manageService.getInquiryDetail(inquiryno);
     }
+
+
+    @PostMapping("/inquiry/reply")
+    public ResponseEntity<?> createInquiryReply(@RequestBody InquiryDTO inquiryDTO){
+        System.out.println("1:1문의(답변)" + inquiryDTO);
+        manageService.insertReply(inquiryDTO);
+        return ResponseEntity.ok("답변완료");
+    }
+
+    @GetMapping("/find-id")
+    public ResponseEntity<?> findId(@RequestParam String username,
+                                    @RequestParam String nickname) {
+        System.out.println("aaaaa"+ username +  " "+nickname);
+        MemberDTO member = userService.findIdByUserInfo(username, nickname);
+        String foundId = (member != null) ? member.getUserid() : null;
+        System.out.println(member);
+        return ResponseEntity.ok(Map.of("foundId", foundId));
+    }
+
+    @PostMapping("/find-pwd")
+    public ResponseEntity<?> findPwd(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String userid   = body.get("userid");
+        String nickname = body.get("nickname");
+
+        // 입력 로깅
+        System.out.println("[find-pwd] username=" + username + ", userid=" + userid + ", nickname=" + nickname);
+
+        MemberDTO member = userService.findForPwd(userid, username, nickname);
+        if (member == null) {
+            return ResponseEntity.ok(Map.of("tempPassword", null));
+        }
+
+        // 임시 비밀번호 생성 (영문/숫자 10자)
+        String temp = generateTempPassword(10);
+
+        // 암호화 후 저장
+        String encoded = passwordEncoder.encode(temp);
+        manageService.updatePassword(userid, encoded);
+
+        // 보안상 실제 서비스에서는 화면에 노출하지 말고 이메일/SMS 발송 권장
+        return ResponseEntity.ok(Map.of("tempPassword", temp));
+    }
+
+    // 간단 임시 비밀번호 생성 유틸(컨트롤러 내 private 메서드)
+    private String generateTempPassword(int len) {
+        String base = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+        StringBuilder sb = new StringBuilder(len);
+        java.security.SecureRandom r = new java.security.SecureRandom();
+        for (int i = 0; i < len; i++) sb.append(base.charAt(r.nextInt(base.length())));
+        return sb.toString();
+    }
+
 
 
 }

@@ -11,4 +11,7 @@ public interface MovieReviewMapper {
 
     // 새로운 리뷰를 데이터베이스에 삽입하는 메서드
     void insertReview(MovieReviewDTO movieReview);
+
+    int updateReview(MovieReviewDTO review);
+    void deleteReview(int reviewNo, int userNo);
 }
