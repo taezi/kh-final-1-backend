@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -120,5 +122,20 @@ public class AuthController {
         MemberDTO user = userService.findByid(Long.parseLong(userno));
         if (user == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/duplicate-check")
+    public Map<String, Object> duplicateCheck(@RequestParam("userid") String userid){
+        System.out.println("aaaaaaa"+userid);
+        Map<String, Object> map = new HashMap<>();
+        boolean isAvailable = userService.findByUserid(userid) == null;
+        map.put("isAvailable", isAvailable);
+        if(isAvailable){
+            map.put("msg", "사용 가능한 아이디입니다.");
+        } else {
+            map.put("msg", "이미 사용 중인 아이디입니다.");
+        }
+
+        return map;
     }
 }
