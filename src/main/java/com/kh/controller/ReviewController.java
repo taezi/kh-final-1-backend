@@ -2,6 +2,7 @@ package com.kh.controller;
 
 import com.kh.dto.ReviewDTO;
 import com.kh.service.ReviewService;
+import com.kh.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,8 @@ public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
+    @Autowired
+    private UserService userService;
 
     // 1. 댓글 목록 조회
     @GetMapping("/{contentType}/{contentNo}")
@@ -22,6 +25,15 @@ public class ReviewController {
             @PathVariable Long contentNo
     ) {
         List<ReviewDTO> comments = reviewService.getComments(contentType, contentNo);
+        System.out.println(comments);
+
+
+        for(ReviewDTO m : comments){
+            m.setUsername(userService.findByUserno(m.getUserno()).getUsername());
+        }
+
+
+
         return ResponseEntity.ok(comments);
     }
 

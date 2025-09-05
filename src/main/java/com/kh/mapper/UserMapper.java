@@ -12,4 +12,6 @@ public interface UserMapper {
     MemberDTO findByid(long userno);
 
     MemberDTO findByUsername(String beforeUsername);
+
+    MemberDTO findByUserno(Long userno);
 }

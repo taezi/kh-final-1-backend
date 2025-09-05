@@ -31,13 +31,13 @@
     <update id="updateComment">
         UPDATE review
         SET commenta = #{commenta}
-        WHERE reviewno = #{reviewno}
+        WHERE reviewno = #{reviewNo}
     </update>
 
     <!-- 댓글 삭제 -->
     <delete id="deleteComment">
         DELETE FROM review
-        WHERE reviewno = #{reviewno}
+        WHERE reviewno = #{reviewNo}
     </delete>
 
 </mapper>

@@ -24,5 +24,9 @@
     </select>
 
 
+    <select id="findByUserno" resultType="member">
+        select * from member
+        where userno = #{userno}
+    </select>
 
 </mapper>

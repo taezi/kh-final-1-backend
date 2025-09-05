@@ -25,4 +25,8 @@ public class UserService {
     public MemberDTO findByUsername(String beforeUsername) {
         return userMapper.findByUsername(beforeUsername);
     }
+
+    public MemberDTO findByUserno(Long userno) {
+        return userMapper.findByUserno(userno);
+    }
 }
