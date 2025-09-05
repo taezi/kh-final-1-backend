@@ -74,4 +74,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         res.getWriter().write("{\"error\":\"" + message + "\"}");
     }
 }
-
