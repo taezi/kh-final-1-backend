@@ -14,4 +14,5 @@ public class ReviewDTO {
     private String createdat;
     private String contenttype;
     private Long contentno;
+    private String username;
 }

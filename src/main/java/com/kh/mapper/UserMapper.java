@@ -18,6 +18,9 @@ public interface UserMapper {
     MemberDTO findByUsername(String beforeUsername);
 
 
+    MemberDTO findByUserno(Long userno);
+
+
     MemberDTO findIdByUserInfo(@Param("username") String username,
                                @Param("nickname") String nickname);
 
@@ -30,5 +33,6 @@ public interface UserMapper {
     List<MemberDTO> selectAllUser();
 
     int deleteUserByUserno(Long userno);
+
 
 }
