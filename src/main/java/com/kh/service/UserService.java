@@ -51,4 +51,7 @@ public class UserService {
     }
 
 
+    public MemberDTO selectUserByUserno(int userno) {
+        return userMapper.selectUserByUserno(userno);
+    }
 }

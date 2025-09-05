@@ -60,4 +60,8 @@
     </delete>
 
 
+    <select id="selectUserByUserno" parameterType="int" resultType="member">
+        SELECT * FROM member
+        WHERE userno = #{userno}
+    </select>
 </mapper>
