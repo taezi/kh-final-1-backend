@@ -67,9 +67,6 @@ public class SecurityConfig {
                                 "/api/reviews/**"
                         ).authenticated()  // 로그인한 유저만 사용가능
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
-                                       
-                        /* ====== 나머지 ====== */
-                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
