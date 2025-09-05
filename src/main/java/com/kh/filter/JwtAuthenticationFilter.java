@@ -56,14 +56,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     System.out.println("### JWT Filter: 인증 성공 - 사용자 ID: " + id + ", 권한: " + authorities);
+                } else {
+                    System.out.println("### JWT Filter: 유효하지 않은 토큰 감지");
+                    sendUnauthorizedResponse(res, "유효하지 않은 토큰입니다.");
+                    return;
                 }
             } catch (ExpiredJwtException e) {
                 System.out.println("### JWT Filter: 토큰 만료 감지");
                 sendUnauthorizedResponse(res, "Access Token이 만료되었습니다.");
-                return;
-            } catch (Exception e) {
-                System.out.println("### JWT Filter: 유효하지 않은 토큰 감지");
-                sendUnauthorizedResponse(res, "유효하지 않은 토큰입니다.");
                 return;
             }
         } else {
