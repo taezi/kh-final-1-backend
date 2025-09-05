@@ -35,4 +35,10 @@ public class UserService {
     public int deleteUserByUserno(Long userno) {
         return userMapper.deleteUserByUserno(userno);
     }
+
+
+    public MemberDTO selectUserByUserno(int userno) {
+        return userMapper.selectUserByUserno(userno);
+    }
+
 }

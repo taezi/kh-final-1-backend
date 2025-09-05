@@ -41,4 +41,11 @@ public class AdminController {
         return map;
     }
 
+    // 단일 회원 조회용
+    @GetMapping("/user/{userno}")
+    public MemberDTO getUserByNo(@PathVariable int userno) {
+        System.out.println("단일 회원 조회: " + userno);
+        return userService.selectUserByUserno(userno);
+    }
+
 }

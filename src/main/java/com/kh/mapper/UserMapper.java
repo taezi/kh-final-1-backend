@@ -17,5 +17,8 @@ public interface UserMapper {
 
     List<MemberDTO> selectAllUser();
 
-    int deleteUserByUserno(Long userno);
+
+
+    MemberDTO selectUserByUserno(int userno);
+
 }
