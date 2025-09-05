@@ -30,4 +30,5 @@ public interface ManageMapper {
 
 
     int insertReply(InquiryDTO inquiryDTO);
+
 }

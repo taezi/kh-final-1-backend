@@ -18,8 +18,8 @@
         where contenttype = #{type} and userno = #{userno}
     </select>
 
-    <select id="getAllBookmarks" resultType="bookmark">
-        select * from bookmark
+    <select id="getAllBookmarks" resultType="bookmarkcontent">
+        select * from v_bookmark_content
         where userno = #{userno}
     </select>
 
