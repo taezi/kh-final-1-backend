@@ -11,9 +11,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -66,7 +63,10 @@ public class RestPlaceApiService {
         }
 
         // 단일 검색: 카페 이름과 지점명을 합쳐 한 번에 검색을 시도합니다.
-        String query = restName + " " + (restBranch != null ? restBranch : "");
+        String query = restName;
+        if (restBranch != null && !restBranch.trim().isEmpty()) {
+            query += " " + restBranch;
+        }
         logger.info("단일 검색: '{}'로 place_id를 찾습니다.", query);
 
         return findPlaceId(query)

@@ -6,20 +6,25 @@ import java.time.LocalDate;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EventDto {
-    private Long cultureNo;          // CULUTENO (NUMBER)
-    private String category;         // CATEGORY
-    private String district;         // DISTRICT
-    private String cultureName;      // CULUTENAME
-    private String cultureAddress;   // CULTUREADDRESS
-    private String organizationName; // ORGANIZATIONNAME
-    private String targetAudience;   // TARGETAUDIENCE
-    private String fee;              // FEE
-    private String description;      // DESCRIPTION
-    private String thumbnailImage;   // THUMBNAILIMAGE
-    private String portalUrl;        // PORTALURL
-    private String isFree;           // ISFREE (VARCHAR2(10) → 'Y'/'N' 등 문자열로 둠)
-    private LocalDate startDate;     // STARTDATE (DATE)
-    private LocalDate endDate;       // ENDDATE (DATE)
+    private Long id;           // 내부 증가 ID
+    private String title;      // culutename / title / name ...
+    private String place;      // cultureaddress / address ...
+    private String gu;         // district / gu ...
+    private String category;   // category
 
+    private LocalDate dateStart; // startdate / start_date / sdate ...
+    private LocalDate dateEnd;   // enddate / end_date / edate ...
+    private String time;         // (CSV에 없으면 "")
 
+    private String thumbUrl;     // thumbnailimage / image / thumb ...
+    private String fee;          // fee
+    private String audience;     // targetaudience / audience ...
+    private String host;         // organizationname / host ...
+    private String address;      // cultureaddress
+    private String url;          // portalurl / url / link ...
+    private String description;  // description / desc ...
+    private Boolean isFree;      // isfree == "무료"/true/1/Y/예
+
+    private Double lat;          // 확장
+    private Double lng;          // 확장
 }
