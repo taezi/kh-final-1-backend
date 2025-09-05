@@ -23,6 +23,7 @@
         where username = #{beforeUsername}
     </select>
 
+
     <select id="findIdByUserInfo" parameterType="map" resultType="member">
         SELECT userno, userid, username, password, email, nickname, joindate, role
         FROM member
@@ -41,5 +42,15 @@
 
 
 
+    <select id="selectAllUser" resultType="member">
+        select * from member
+        where role = 'user'
+    </select>
+
+
+    <delete id="deleteUserByUserno">
+        delete from member
+        where userno = #{userno}
+    </delete>
 
 </mapper>

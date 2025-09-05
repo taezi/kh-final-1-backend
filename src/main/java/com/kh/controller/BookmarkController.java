@@ -25,11 +25,12 @@ public class BookmarkController {
         System.out.println("북마크 usrno : " + userno);
         System.out.println("북마크 type : " + type);
         if (type != null) {
-            System.out.println("11111111 : " +  bookmarkService.getBookmarksByType(userno, type));
             return bookmarkService.getBookmarksByType(userno, type);
         }
+        System.out.println("모든 북마크 : " + bookmarkService.getAllBookmarks(userno));
         return bookmarkService.getAllBookmarks(userno);
     }
+
 
 
 

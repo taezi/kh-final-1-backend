@@ -50,6 +50,7 @@ public class ManageService {
         return mapper.getInquiryDetail(inquiryno);
     }
 
+
     public List<InquiryDTO> getInquiriesList() {
         return mapper.getInquiriesList();
     }
@@ -57,4 +58,5 @@ public class ManageService {
     public int insertReply(InquiryDTO inquiryDTO) {
         return mapper.insertReply(inquiryDTO);
     }
+
 }

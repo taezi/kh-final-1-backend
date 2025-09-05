@@ -45,6 +45,7 @@
         select * from inquiry where inquiryno = #{inquiryno}
     </select>
 
+
     <select id="getInquiriesList" resultType="inquiry">
         select * from inquiry
     </select>
@@ -56,6 +57,7 @@
         status = 'replied'
         where inquiryno = #{inquiryno , jdbcType=NUMERIC}
     </update>
+
 
 
 

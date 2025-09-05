@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.mapper.RestMapper">
+    <!-- RestDto와 DB 컬럼을 매핑하는 resultMap.
+         여기에 정의된 컬럼만 DTO와 매핑됩니다. -->
+    <resultMap id="RestDtoMap" type="com.kh.dto.RestDto">
+        <id property="restNo" column="RESTNO"/>
+        <result property="restName" column="RESTNAME"/>
+        <result property="restBranch" column="RESTBRANCH"/>
+        <result property="restRegion" column="RESTREGION"/>
+        <result property="restImgAddress" column="RESTIMGADDRESS"/>
+        <result property="restType" column="RESTTYPE"/>
+        <result property="restOpen" column="RESTOPEN"/>
+        <result property="restPhonNumber" column="RESTPHONNUMBER"/>
+        <result property="restSummary" column="RESTSUMMARY"/>
+        <result property="restWebsite" column="RESTWEBSITE"/>
+        <result property="restMapUrl" column="RESTMAPURL"/>
+    </resultMap>
+
+    <!-- updateRest: 기존 카페 정보를 업데이트합니다.
+         WHERE 절에 고유한 PK인 restNo를 사용하여 특정 레코드를 정확하게 업데이트합니다.
+         만약 restAddress 필드가 DTO에 없다면 제거해야 합니다. -->
+    <!-- updateRest 쿼리 -->
+    <update id="updateRest" parameterType="com.kh.dto.RestDto">
+        UPDATE REST
+        SET
+        RESTIMGADDRESS = #{restImgAddress},
+        RESTOPEN = #{restOpen},
+        RESTPHONNUMBER = #{restPhonNumber},
+        RESTWEBSITE = #{restWebsite},
+        RESTMAPURL = #{restMapUrl}
+        WHERE RESTNAME = #{restName} and RESTBRANCH = #{restBranch}
+    </update>
+
+    <!-- findByRestNameAndBranch: 카페 이름과 지점명을 기준으로 정보를 조회합니다.
+         결과를 RestDtoMap에 매핑합니다. -->
+    <select id="findByRestNameAndBranch" resultMap="RestDtoMap">
+        SELECT *
+        FROM REST
+        WHERE RESTNAME = #{restName} AND RESTBRANCH = #{restBranch}
+    </select>
+
+    <select id="findByGuAndQuery" resultMap="RestDtoMap">
+        SELECT
+        RESTNO, RESTNAME, RESTBRANCH, RESTIMGADDRESS, RESTREGION,
+        RESTTYPE, RESTOPEN, RESTPHONNUMBER, RESTSUMMARY, RESTWEBSITE,
+        RESTMAPURL
+        FROM
+        REST
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                RESTREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (RESTNAME LIKE '%' || #{q} || '%' OR RESTBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
+        ORDER BY RESTNO
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <select id="countByGuAndQuery" resultType="int">
+        SELECT COUNT(*)
+        FROM REST
+        <where>
+            <if test="gu != null and !gu.isEmpty()">
+                RESTREGION = #{gu}
+            </if>
+            <if test="q != null and !q.isEmpty()">
+                <if test="gu != null and !gu.isEmpty()">
+                    AND
+                </if>
+                (RESTNAME LIKE '%' || #{q} || '%' OR RESTBRANCH LIKE '%' || #{q} || '%')
+            </if>
+        </where>
+    </select>
+</mapper>

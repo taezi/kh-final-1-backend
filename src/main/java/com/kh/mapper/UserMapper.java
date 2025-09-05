@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
     MemberDTO findByUserid(String userid);
@@ -15,6 +17,7 @@ public interface UserMapper {
 
     MemberDTO findByUsername(String beforeUsername);
 
+
     MemberDTO findIdByUserInfo(@Param("username") String username,
                                @Param("nickname") String nickname);
 
@@ -22,5 +25,10 @@ public interface UserMapper {
                          @Param("username") String username,
                          @Param("nickname") String nickname);
 
+
+
+    List<MemberDTO> selectAllUser();
+
+    int deleteUserByUserno(Long userno);
 
 }

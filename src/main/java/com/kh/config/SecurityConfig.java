@@ -38,25 +38,36 @@ public class SecurityConfig {
 
                         /* ====== 기타 공개 GET ====== */
                         .requestMatchers(HttpMethod.GET,
-                                "/api/movie/**",
+                                "/api/movie/review/**",
+                                "/api/movies/**",
                                 "/api/notices/**",
                                 "/api/editors/**",
+                                "/api/place/**",
+                                "/api/weather/**",
+                                "/api/cafe/**",
+                                "/api/rest/**", 
                                 "/api/cinemas/**"
                         ).permitAll()
-
-                        /* ====== 회원 관련 공개 ====== */
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/manage/find-id").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/manage/find-pwd").permitAll()
 
-                        /* ====== 인증 필요 API ====== */
-                        .requestMatchers(HttpMethod.POST, "/api/movie/review").authenticated()
-                        .requestMatchers("/api/manage/inquiry/**", "/api/bookmarks/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT,
+                        "/api/views/**").permitAll()
+                        // 2. 인증이 필요한 POST 요청을 구체적으로 명시
+                        .requestMatchers(HttpMethod.POST, "/api/movie/review/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll() // 로그인/회원가입 등
 
-                        /* ====== 권한 필요 ====== */
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
+
+                        .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/editors/**").hasRole("EDITOR")
-
+                        .requestMatchers(
+                                "/api/manage/inquiry/**",
+                                "/api/bookmarks/**",
+                                "/api/reviews/**"
+                        ).authenticated()  // 로그인한 유저만 사용가능
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
+                                       
                         /* ====== 나머지 ====== */
                         .anyRequest().authenticated()
                 )

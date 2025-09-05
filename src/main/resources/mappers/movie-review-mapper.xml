@@ -4,21 +4,39 @@
 
 <mapper namespace="com.kh.mapper.MovieReviewMapper">
 
-    <select id="getReviewsByContent" resultType="com.kh.dto.MovieReviewDTO">
-        SELECT REVIEWNO AS reviewNo,
-        USERNO AS userNo,
-        COMMENTA AS comment,
-        CREATEDAT AS createDat,
-        CONTENTTYPE AS contentType,
-        CONTENTNO AS contentNo FROM REVIEW WHERE CONTENTNO = #{contentNo} ORDER BY CREATEDAT DESC
+    <select id="getReviewsByContent" resultType="moviereview">
+        SELECT
+        R.REVIEWNO,
+        R.USERNO,
+        R.COMMENTA,
+        R.CREATEDAT,
+        R.CONTENTTYPE,
+        R.CONTENTNO,
+        M.USERNAME AS USERNAME
+        FROM REVIEW R
+        JOIN MEMBER M ON R.USERNO = M.USERNO
+        WHERE R.CONTENTNO = #{contentNo}
+        ORDER BY R.CREATEDAT DESC
     </select>
 
     <insert id="insertReview">
-        INSERT INTO REVIEW (USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO) VALUES (
-        #{userNo},
-        #{comment}, SYSDATE,
-        #{contentType},
-        #{contentNo}
-        )
+        INSERT INTO REVIEW (USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO)
+        VALUES (#{userNo}, #{commentA}, SYSDATE, #{contentType}, #{contentNo})
     </insert>
+
+
+
+    <update id="updateReview">
+        UPDATE REVIEW
+        SET
+        COMMENTA = #{commentA},
+        MODIFIEDAT = SYSDATE
+        WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
+    </update>
+
+    <delete id="deleteReview">
+        DELETE FROM REVIEW
+        WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
+    </delete>
+
 </mapper>
