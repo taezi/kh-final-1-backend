@@ -29,8 +29,8 @@
     <update id="updateReview">
         UPDATE REVIEW
         SET
-        COMMENTA = #{commentA},
-        MODIFIEDAT = SYSDATE
+        COMMENTA = #{commentA}
+<!--        MODIFIEDAT = SYSDATE-->
         WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
     </update>
 

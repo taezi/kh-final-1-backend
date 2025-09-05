@@ -27,7 +27,12 @@ public class MovieReviewService {
     // 리뷰 수정 메서드
     @Transactional
     public void updateReview(MovieReviewDTO review) {
-        movieReviewMapper.updateReview(review);
+        int updatedRows = movieReviewMapper.updateReview(review);
+
+        // 3. 만약 업데이트된 행이 0이라면 예외를 발생시켜 클라이언트에 에러를 알림
+        if (updatedRows == 0) {
+            throw new RuntimeException("리뷰 업데이트에 실패했습니다. 리뷰가 존재하지 않거나 권한이 없습니다.");
+        }
     }
 
     // 리뷰 삭제 메서드
