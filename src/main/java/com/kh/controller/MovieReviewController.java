@@ -76,10 +76,13 @@ public class MovieReviewController {
             return new ResponseEntity<>("리뷰가 성공적으로 수정되었습니다.", HttpStatus.OK);
         } catch (NumberFormatException e) {
             return new ResponseEntity<>("사용자 인증 정보가 유효하지 않습니다.", HttpStatus.UNAUTHORIZED);
+        } catch (RuntimeException e) {
+            System.err.println("리뷰 수정 중 오류 발생: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
         } catch (Exception e) {
             System.err.println("리뷰 수정 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
-            return new ResponseEntity<>("리뷰 수정 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("알 수 없는 서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
