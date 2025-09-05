@@ -59,8 +59,8 @@ public class SecurityConfig {
 
                         // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
 
-                        .requestMatchers("/api/notices/**", "/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/editors/**").hasRole("EDITOR")
+                        .requestMatchers("/api/notices/**", "/api/admin/**").hasAuthority("admin")
+                        .requestMatchers("/api/editors/**").hasAuthority("editor")
                         .requestMatchers(
                                 "/api/manage/inquiry/**",
                                 "/api/bookmarks/**",

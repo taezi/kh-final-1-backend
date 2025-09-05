@@ -59,6 +59,7 @@ public class AuthController {
         Cookie cookie = new Cookie("refreshToken", refresh);
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // prod: true (HTTPS)
+//        cookie.setAttribute("SameSite", "Strict"); 배포시 위에랑 같이 변경
         cookie.setPath("/");
         cookie.setMaxAge((int)(jwt.getRefreshTokenExpirationMs()/1000));
         res.addCookie(cookie);
@@ -69,7 +70,8 @@ public class AuthController {
 
     /** Access 만료 시 호출: 쿠키의 refreshToken으로 Access 재발급 */
     @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(HttpServletRequest req) {
+    public ResponseEntity<JwtResponse> refresh(HttpServletRequest req , HttpServletResponse res) {
+        System.out.println("==== REFRESH TOKEN 요청 들어옴 ====");
         String refresh = Arrays.stream(Optional.ofNullable(req.getCookies()).orElse(new Cookie[0]))
                 .filter(c -> "refreshToken".equals(c.getName()))
                 .findFirst().map(Cookie::getValue).orElse(null);
@@ -84,8 +86,19 @@ public class AuthController {
         System.out.println(user);
 
 
+        //  새 Access Token & Refresh Token 발급
         String newAccess = jwt.generateAccessToken(user);
-        return ResponseEntity.ok(new JwtResponse(newAccess, null, "Bearer", user));
+        String newRefresh = jwt.generateRefreshToken(user);
+
+        // 새 Refresh Token 쿠키로 내려주기
+        Cookie cookie = new Cookie("refreshToken", newRefresh);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); //  운영 배포 시 true로 변경
+        cookie.setPath("/");
+        cookie.setMaxAge((int)(jwt.getRefreshTokenExpirationMs() / 1000));
+        res.addCookie(cookie);
+
+        return ResponseEntity.ok(new JwtResponse(newAccess, newRefresh, "Bearer", user));
     }
 
     @PostMapping("/logout")
