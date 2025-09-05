@@ -23,4 +23,18 @@ public class MovieReviewService {
     public void addReview(MovieReviewDTO movieReview) {
         movieReviewMapper.insertReview(movieReview);
     }
+
+    // 리뷰 수정 메서드
+    @Transactional
+    public void updateReview(MovieReviewDTO review) {
+        movieReviewMapper.updateReview(review);
+    }
+
+    // 리뷰 삭제 메서드
+    @Transactional
+    public void deleteReview(int reviewNo, int userNo) {
+        movieReviewMapper.deleteReview(reviewNo, userNo);
+    }
+
+
 }
