@@ -29,7 +29,7 @@ public interface RestMapper {
      * @return 조회된 카페 정보가 담긴 RestDto 객체
      */
     RestDto findByRestNameAndBranch(@Param("restName") String restName, @Param("restBranch") String restBranch);
-    RestDto findByRestNo(@Param("restNo") int restNo);
+
     /**
      * 특정 지역구(gu)와 검색어(q)를 사용하여 식당 목록을 페이징하여 조회하는 메서드입니다.
      * @param gu 조회할 지역구 이름

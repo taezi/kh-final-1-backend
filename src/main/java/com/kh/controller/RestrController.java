@@ -27,38 +27,32 @@ public class RestrController {
     private RestService restService;
 
     /**
-     * 카페 번호로 카페 정보를 조회하는 API 엔드포인트입니다.
-     * restNo가 제공되지 않으면 restName과 restBranch를 사용합니다.
-     * @param restNo 조회할 카페 번호 (선택적)
-     * @param restName 조회할 카페 이름 (선택적)
-     * @param restBranch 조회할 카페 지점명 (선택적)
+     * 카페 이름과 지점명으로 카페 정보를 조회하는 API 엔드포인트입니다.
+     * 예: GET /api/rest?restName=스타벅스&restBranch=강남점
+     *
+     * @param restName 조회할 카페 이름
+     * @param restBranch 조회할 카페 지점명
+     * @param headers 클라이언트가 보낸 모든 HTTP 헤더. Postman의 인증 헤더를 받기 위해 추가되었습니다.
      * @return 조회된 카페 정보 또는 HTTP 404 Not Found
      */
     @GetMapping("/info")
     public ResponseEntity<RestDto> getRestInfo(
-            @RequestParam(required = false) Integer restNo,
-            @RequestParam(required = false) String restName,
-            @RequestParam(required = false) String restBranch
+            @RequestParam String restName,
+            @RequestParam String restBranch,
+            @RequestHeader Map<String, String> headers // 모든 헤더를 맵으로 받음
     ) throws UnsupportedEncodingException {
 
-        RestDto rest = null;
-        if (restNo != null) {
-            // restNo가 있으면 restNo로 조회
-            rest = restService.getRestByNo(restNo);
-        } else if (restName != null && restBranch != null) {
-            // restNo가 없으면 restName과 restBranch로 조회
-            rest = restService.getRestByNameAndBranch(restName, restBranch);
-        } else {
-            // 필수 파라미터가 누락된 경우
-            return ResponseEntity.badRequest().build();
-        }
+        // 클라이언트에서 보낸 헤더들을 로깅하여 확인 (디버깅용)
+        // headers.forEach((key, value) -> System.out.println("Header: " + key + " = " + value));
 
+        RestDto rest = restService.getRestByNameAndBranch(restName, restBranch);
         if (rest != null) {
             return ResponseEntity.ok(rest);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
     /**
      * 기존 식당 정보를 업데이트하는 API 엔드포인트입니다.
      * 예: POST /api/rest/update
@@ -94,7 +88,7 @@ public class RestrController {
             @RequestParam(value = "size", defaultValue = "12") int size) {
 
         // restService에서 페이징된 데이터를 가져옵니다.
-        Map<String, Object> result = restService.searchRests(gu, q, page, size);
+        Map<String, Object> result = restService.searchRestaurants(gu, q, page, size);
 
         // 결과가 비어있지 않으면 200 OK와 함께 데이터를 반환합니다.
         if (result != null && !((List<RestDto>) result.get("items")).isEmpty()) {
