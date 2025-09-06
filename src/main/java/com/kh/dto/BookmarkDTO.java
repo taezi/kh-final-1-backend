@@ -13,5 +13,4 @@ public class BookmarkDTO {
     private String userno;
     private String contentno;
     private String contenttype;
-    //a
 }

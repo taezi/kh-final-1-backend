@@ -4,7 +4,6 @@ package com.kh.service;
 import com.kh.dto.RestDto;
 import com.kh.mapper.RestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +39,39 @@ public class RestService {
         // 업데이트된 행의 수가 1이면 성공으로 간주
         return restMapper.updateRest(restDto) == 1;
     }
+    public RestDto getRestByNo(int restNo) {
+        // 1. 데이터베이스에서 restNo를 기준으로 카페 정보를 조회합니다.
+        RestDto restFromDb = restMapper.findByRestNo(restNo);
+
+        // 2. DB에 정보가 없거나, 이미지가 없는 경우에만 외부 API를 호출하여 정보를 보완합니다.
+        if (restFromDb == null || restFromDb.getRestImgAddress() == null || restFromDb.getRestImgAddress().isEmpty()) {
+            if (restFromDb != null) {
+                // Rest API는 restName과 restBranch를 사용하므로, DB에서 가져온 값을 전달
+                RestDto finalRestDto = restPlaceApiService
+                        .getRestDetails(restFromDb, restFromDb.getRestName(), restFromDb.getRestBranch())
+                        .block();
+
+                if (finalRestDto != null) {
+                    // API 호출로 정보가 보완되었으면 DB에 업데이트
+                    finalRestDto.setRestNo(restFromDb.getRestNo()); // PK 설정
+                    restMapper.updateRest(finalRestDto);
+                    return finalRestDto;
+                }
+            }
+            return restFromDb; // API 호출 실패 또는 DB에 데이터 자체가 없는 경우
+        }
+
+        // 3. DB에 이미 정보와 이미지가 모두 있는 경우 그대로 반환
+        return restFromDb;
+    }
 
     /**
-     * 카페 이름과 지점명을 기준으로 카페 정보를 조회하고, 이미지가 없을 경우 Google API를 통해 정보를 보완합니다.
+     * 카페 이름과 지점명을 기준으로 카페 정보를 조회하고, 이미지가 없을 경우 Rest API를 통해 정보를 보완합니다.
      * @param restName 조회할 카페의 이름
      * @param restBranch 조회할 카페의 지점명
      * @return 최종적으로 조회되거나 보완된 카페 정보
      */
+
     public RestDto getRestByNameAndBranch(String restName, String restBranch) throws UnsupportedEncodingException {
         // 1. 데이터베이스에서 먼저 카페 정보를 조회합니다.
         RestDto restFromDb = restMapper.findByRestNameAndBranch(restName, restBranch);
@@ -60,10 +85,6 @@ public class RestService {
                 // 기존 데이터가 있으면 업데이트
                 finalRestDto.setRestNo(restFromDb.getRestNo()); // PK 설정
                 restMapper.updateRest(finalRestDto);
-            } else {
-                // 기존 데이터가 없으면 새로 추가
-                // restMapper.insertRest(finalRestDto);
-                // 삽입 로직은 필요에 따라 추가
             }
         }
         return finalRestDto;
@@ -76,7 +97,7 @@ public class RestService {
      * @param size 페이지당 항목 수
      * @return 조회된 식당 목록과 페이징 정보 (hasMore)
      */
-    public Map<String, Object> searchRestaurants(String gu, String q, int page, int size) {
+    public Map<String, Object> searchRests(String gu, String q, int page, int size) {
         // 1. 전체 데이터 수 조회
         // 이 쿼리를 통해 특정 'gu'와 'q'에 해당하는 전체 식당 수를 가져옵니다.
         int totalCount = restMapper.countByGuAndQuery(gu, q);
@@ -85,7 +106,7 @@ public class RestService {
         int offset = (page - 1) * size;
 
         // 3. 현재 페이지에 해당하는 식당 목록을 가져옵니다.
-        List<RestDto> restaurants = restMapper.findByGuAndQuery(gu, q, offset, size);
+        List<RestDto> rests = restMapper.findByGuAndQuery(gu, q, offset, size);
 
         // 4. 다음 페이지가 있는지 확인
         // (현재 페이지 번호 * 페이지당 항목 수)가 전체 항목 수보다 작으면 다음 페이지가 존재합니다.
@@ -93,7 +114,7 @@ public class RestService {
 
         // 5. 결과를 맵에 담아 반환합니다.
         Map<String, Object> result = new HashMap<>();
-        result.put("items", restaurants);
+        result.put("items", rests);
         result.put("hasMore", hasMore);
 
         return result;
