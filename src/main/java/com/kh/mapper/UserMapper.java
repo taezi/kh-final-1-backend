@@ -2,6 +2,8 @@ package com.kh.mapper;
 
 import com.kh.dto.MemberDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 
 import java.util.List;
 
@@ -15,10 +17,23 @@ public interface UserMapper {
 
     MemberDTO findByUsername(String beforeUsername);
 
+
+    MemberDTO findByUserno(Long userno);
+
+
+    MemberDTO findIdByUserInfo(@Param("username") String username,
+                               @Param("nickname") String nickname);
+
+    MemberDTO findForPwd(@Param("userid") String userid,
+                         @Param("username") String username,
+                         @Param("nickname") String nickname);
+
+
+
     List<MemberDTO> selectAllUser();
 
+    int deleteUserByUserno(Long userno);
 
 
     MemberDTO selectUserByUserno(int userno);
-
 }

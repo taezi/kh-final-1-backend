@@ -19,45 +19,19 @@
         <result property="restMapUrl" column="RESTMAPURL"/>
     </resultMap>
 
-    <select id="findByRestNo" resultMap="RestDtoMap">
-        SELECT *
-        FROM REST
-        WHERE RESTNO = #{restNo}
-    </select>
-
-
     <!-- updateRest: 기존 카페 정보를 업데이트합니다.
          WHERE 절에 고유한 PK인 restNo를 사용하여 특정 레코드를 정확하게 업데이트합니다.
          만약 restAddress 필드가 DTO에 없다면 제거해야 합니다. -->
     <!-- updateRest 쿼리 -->
     <update id="updateRest" parameterType="com.kh.dto.RestDto">
         UPDATE REST
-        <set>
-            <if test="restImgAddress != null">
-                RESTIMGADDRESS = #{restImgAddress},
-            </if>
-            <if test="restOpen != null">
-                RESTOPEN = #{restOpen},
-            </if>
-            <if test="restPhonNumber != null">
-                RESTPHONNUMBER = #{restPhonNumber},
-            </if>
-            <if test="restWebsite != null">
-                RESTWEBSITE = #{restWebsite},
-            </if>
-            <if test="restMapUrl != null">
-                RESTMAPURL = #{restMapUrl},
-            </if>
-        </set>
-        <where>
-            RESTNAME = #{restName}
-            <if test="restBranch != null and !restBranch.trim().isEmpty()">
-                AND RESTBRANCH = #{restBranch}
-            </if>
-            <if test="restBranch == null or restBranch.trim().isEmpty()">
-                AND RESTBRANCH IS NULL
-            </if>
-        </where>
+        SET
+        RESTIMGADDRESS = #{restImgAddress},
+        RESTOPEN = #{restOpen},
+        RESTPHONNUMBER = #{restPhonNumber},
+        RESTWEBSITE = #{restWebsite},
+        RESTMAPURL = #{restMapUrl}
+        WHERE RESTNAME = #{restName} and RESTBRANCH = #{restBranch}
     </update>
 
     <!-- findByRestNameAndBranch: 카페 이름과 지점명을 기준으로 정보를 조회합니다.

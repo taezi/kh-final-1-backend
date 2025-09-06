@@ -3,9 +3,12 @@ package com.kh.controller;
 import com.kh.dto.CafeDto;
 import com.kh.service.CafeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -24,38 +27,32 @@ public class CafeController {
     private CafeService cafeService;
 
     /**
-     * 카페 번호로 카페 정보를 조회하는 API 엔드포인트입니다.
-     * cafeNo가 제공되지 않으면 cafeName과 cafeBranch를 사용합니다.
-     * @param cafeNo 조회할 카페 번호 (선택적)
-     * @param cafeName 조회할 카페 이름 (선택적)
-     * @param cafeBranch 조회할 카페 지점명 (선택적)
+     * 카페 이름과 지점명으로 카페 정보를 조회하는 API 엔드포인트입니다.
+     * 예: GET /api/cafe?cafeName=스타벅스&cafeBranch=강남점
+     *
+     * @param cafeName 조회할 카페 이름
+     * @param cafeBranch 조회할 카페 지점명
+     * @param headers 클라이언트가 보낸 모든 HTTP 헤더. Postman의 인증 헤더를 받기 위해 추가되었습니다.
      * @return 조회된 카페 정보 또는 HTTP 404 Not Found
      */
     @GetMapping("/info")
     public ResponseEntity<CafeDto> getCafeInfo(
-            @RequestParam(required = false) Integer cafeNo,
-            @RequestParam(required = false) String cafeName,
-            @RequestParam(required = false) String cafeBranch
+            @RequestParam String cafeName,
+            @RequestParam String cafeBranch,
+            @RequestHeader Map<String, String> headers // 모든 헤더를 맵으로 받음
     ) throws UnsupportedEncodingException {
 
-        CafeDto cafe = null;
-        if (cafeNo != null) {
-            // cafeNo가 있으면 cafeNo로 조회
-            cafe = cafeService.getCafeByNo(cafeNo);
-        } else if (cafeName != null && cafeBranch != null) {
-            // cafeNo가 없으면 cafeName과 cafeBranch로 조회
-            cafe = cafeService.getCafeByNameAndBranch(cafeName, cafeBranch);
-        } else {
-            // 필수 파라미터가 누락된 경우
-            return ResponseEntity.badRequest().build();
-        }
+        // 클라이언트에서 보낸 헤더들을 로깅하여 확인 (디버깅용)
+        // headers.forEach((key, value) -> System.out.println("Header: " + key + " = " + value));
 
+        CafeDto cafe = cafeService.getCafeByNameAndBranch(cafeName, cafeBranch);
         if (cafe != null) {
             return ResponseEntity.ok(cafe);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
     /**
      * 기존 식당 정보를 업데이트하는 API 엔드포인트입니다.
      * 예: POST /api/cafe/update
