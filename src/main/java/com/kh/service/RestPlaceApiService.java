@@ -2,19 +2,16 @@ package com.kh.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kh.dto.RestDto; // RestDto 클래스를 import 합니다.
+import com.kh.dto.RestDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Rest Places API를 사용하여 카페 정보를 조회하고 DTO로 변환하는 서비스입니다.
@@ -66,7 +63,10 @@ public class RestPlaceApiService {
         }
 
         // 단일 검색: 카페 이름과 지점명을 합쳐 한 번에 검색을 시도합니다.
-        String query = restName + " " + (restBranch != null ? restBranch : "");
+        String query = restName;
+        if (restBranch != null && !restBranch.trim().isEmpty()) {
+            query += " " + restBranch;
+        }
         logger.info("단일 검색: '{}'로 place_id를 찾습니다.", query);
 
         return findPlaceId(query)
