@@ -12,10 +12,11 @@ public interface NoticeMapper {
     // 공지글 등록
     void insertNotice(NoticeDTO noticeDTO);
 
-    // 공지글 전체 조회 (페이징)
-    List<NoticeDTO> selectNoticeAll(@Param("start") int start, @Param("end") int end);
+    // 공지글 전체 조회 (페이징) - offset/limit 방식
+    List<NoticeDTO> selectNoticeAll(@Param("offset") int offset,
+                                    @Param("limit") int limit);
 
-    // 전체 공지글 수 조회 (페이지네이션용)
+    // 전체 공지글 수
     long countNotice();
 
     // 공지글 상세 조회

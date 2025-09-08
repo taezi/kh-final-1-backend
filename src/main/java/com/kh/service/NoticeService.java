@@ -13,15 +13,16 @@ public class NoticeService {
     @Autowired
     private NoticeMapper noticeMapper;
 
-    //공지글 저장
+    // 공지글 저장
     public void insertNotice(NoticeDTO noticeDTO) {
         noticeMapper.insertNotice(noticeDTO);
     }
-    // 공지글 전체 조회 (페이징)
+
+    // 공지글 전체 조회 (페이징) - offset/limit 계산
     public List<NoticeDTO> selectNoticeAll(int page, int size) {
-        int start = (page - 1) * size + 1;
-        int end = page * size;
-        return noticeMapper.selectNoticeAll(start, end);
+        int offset = Math.max(0, (page - 1) * size);
+        int limit = size;
+        return noticeMapper.selectNoticeAll(offset, limit);
     }
 
     // 전체 게시글 수
@@ -36,8 +37,7 @@ public class NoticeService {
 
     // 공지글 수정
     public boolean updateNotice(NoticeDTO noticeDTO) {
-        int result = noticeMapper.updateNotice(noticeDTO);
-        return result > 0;
+        return noticeMapper.updateNotice(noticeDTO) > 0;
     }
 
     // 공지글 삭제
@@ -45,12 +45,8 @@ public class NoticeService {
         noticeMapper.deleteNotice(noticeno);
     }
 
+    // 조회수 증가
     public boolean incrementView(long noticeno) {
-        int update = noticeMapper.incrementView(noticeno);
-        return update > 0;
+        return noticeMapper.incrementView(noticeno) > 0;
     }
 }
-
-
-
-
