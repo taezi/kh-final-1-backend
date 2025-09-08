@@ -75,4 +75,26 @@ public class EditorService {
     public int insertEditorHashtag(Map<String, Long> map) {
         return editorMapper.insertEditorHashtag(map);
     }
+
+    public void updateEditorHashtags(Long editorno, List<String> hashtags) {
+        // 1) 기존 매핑 삭제
+        editorMapper.deleteEditorHashtags(editorno);
+
+        // 2) 새 해시태그 등록
+        for (String tagName : hashtags) {
+            Long hashtagId = editorMapper.findHashtagIdByName(tagName);
+
+            if (hashtagId == null) {
+                HashtagDTO hashtag = new HashtagDTO();
+                hashtag.setTagname(tagName);
+                editorMapper.insertHashtag(hashtag);
+                hashtagId = hashtag.getHashtagid();
+            }
+
+            Map<String, Long> map = new HashMap<>();
+            map.put("editorno", editorno);
+            map.put("hashtagid", hashtagId);
+            editorMapper.insertEditorHashtag(map);
+        }
+    }
 }

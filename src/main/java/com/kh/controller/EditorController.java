@@ -1,5 +1,6 @@
 package com.kh.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.dto.EditorDTO;
 import com.kh.dto.HashtagDTO;
 import com.kh.service.EditorService;
@@ -140,6 +141,30 @@ public class EditorController {
             map.put("editorno", editorno);
             map.put("hashtagid", hashtagId);
             editorService.insertEditorHashtag(map);
+        }
+    }
+
+    // 게시글 + 해시태그 수정
+    @PutMapping("/{editorno}/with-hashtags")
+    public ResponseEntity<?> updateEditorWithHashtags(
+            @PathVariable Long editorno,
+            @RequestBody Map<String, Object> request
+    ) {
+        System.out.println(editorno);
+        System.out.println(request);
+        try {
+            // 게시글 정보 업데이트
+            EditorDTO editorDTO = new ObjectMapper().convertValue(request.get("editor"), EditorDTO.class);
+            editorDTO.setEditorno(editorno);
+            editorService.updateEditor(editorDTO);
+
+            // 해시태그 갱신
+            List<String> hashtags = (List<String>) request.get("hashtags");
+            editorService.updateEditorHashtags(editorno, hashtags);
+
+            return ResponseEntity.ok("수정 완료");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패");
         }
     }
 

@@ -97,6 +97,11 @@
         VALUES (#{editorno}, #{hashtagid})
     </insert>
 
+    <!-- 특정 게시글의 해시태그 매핑 삭제 -->
+    <delete id="deleteEditorHashtags" parameterType="long">
+        DELETE FROM editor_hashtag WHERE editorno = #{editorno}
+    </delete>
+
 
 
 </mapper>
