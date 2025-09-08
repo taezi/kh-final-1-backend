@@ -39,4 +39,6 @@ public interface EditorMapper {
     int insertHashtag(HashtagDTO hashtag);
 
     int insertEditorHashtag(Map<String, Long> map);
+
+    void deleteEditorHashtags(Long editorno);
 }
