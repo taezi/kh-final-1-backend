@@ -1,6 +1,7 @@
 package com.kh.controller;
 
 import com.kh.dto.EditorDTO;
+import com.kh.dto.HashtagDTO;
 import com.kh.service.EditorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,9 +29,12 @@ public class EditorController {
 
     // 게시글 등록
     @PostMapping
-    public ResponseEntity<?> createEditor(@RequestBody EditorDTO editorDTO) {
+    public Map<String, Object> createEditor(@RequestBody EditorDTO editorDTO) {
+        Map<String, Object> map = new HashMap<>();
         editorService.insertEditor(editorDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body("저장 성공");
+        int maxEditorno = editorService.selectMaxEditorno();
+        map.put("editorno", maxEditorno);
+        return map;
     }
 
     // 게시글 전체 목록 조회
@@ -38,7 +42,6 @@ public class EditorController {
     public ResponseEntity<Map<String, Object>> list() {
         Map<String, Object> map = new HashMap<>();
         List<EditorDTO> eList = editorService.selectEditorAll();
-        System.out.println("eList : " + eList);
         map.put("eList", eList);
         return ResponseEntity.ok(map);
     }
@@ -46,6 +49,8 @@ public class EditorController {
     // 게시글 상세 조회
     @GetMapping("/{editorno}")
     public ResponseEntity<EditorDTO> detail(@PathVariable long editorno) {
+
+
         return ResponseEntity.ok(editorService.selectEditorById(editorno));
     }
 
@@ -107,6 +112,35 @@ public class EditorController {
         result.put("uploadUrl", presignedUrl.toString());
         result.put("fileUrl", "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + key);
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/hashtag")
+    public void saveEditorHashtags(@RequestBody Map<String, Object> request){
+
+        Long editorno = Long.parseLong(request.get("editorno").toString());
+        List<String> hashtags = (List<String>) request.get("hashtags");
+
+        System.out.println("받은 데이터: " + request);
+        System.out.println("게시글 번호: " + editorno);
+        System.out.println("해시태그 목록: " + hashtags);
+
+        for (String tagName : hashtags) {
+            Long hashtagId = editorService.findHashtagIdByName(tagName);
+            System.out.println("tagName : " + tagName);
+            System.out.println("hashtagId : " + hashtagId);
+
+            if (hashtagId == null) {
+                HashtagDTO hashtag = new HashtagDTO();
+                hashtag.setTagname(tagName);
+                editorService.insertHashtag(hashtag);
+                hashtagId = hashtag.getHashtagid();
+            }
+            System.out.println("hashtagId : " + hashtagId);
+            Map<String, Long> map = new HashMap<>();
+            map.put("editorno", editorno);
+            map.put("hashtagid", hashtagId);
+            editorService.insertEditorHashtag(map);
+        }
     }
 
 

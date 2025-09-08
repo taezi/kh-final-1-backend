@@ -3,12 +3,8 @@ package com.kh.controller;
 import com.kh.dto.RestDto;
 import com.kh.service.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -52,6 +48,7 @@ public class RestrController {
             // 필수 파라미터가 누락된 경우
             return ResponseEntity.badRequest().build();
         }
+        System.out.println("식당정보 : " + rest);
 
         if (rest != null) {
             return ResponseEntity.ok(rest);
