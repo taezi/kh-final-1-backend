@@ -1,6 +1,7 @@
 package com.kh.service;
 
 import com.kh.dto.EditorDTO;
+import com.kh.dto.HashtagDTO;
 import com.kh.mapper.EditorMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,4 +59,20 @@ public class EditorService {
         return updated > 0;
     }
 
+
+    public int selectMaxEditorno() {
+        return editorMapper.selectMaxEditorno();
+    }
+
+    public Long findHashtagIdByName(String tagName) {
+        return editorMapper.findHashtagIdByName(tagName);
+    }
+
+    public int insertHashtag(HashtagDTO hashtag) {
+        return editorMapper.insertHashtag(hashtag);
+    }
+
+    public int insertEditorHashtag(Map<String, Long> map) {
+        return editorMapper.insertEditorHashtag(map);
+    }
 }

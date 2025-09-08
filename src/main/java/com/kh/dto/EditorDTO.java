@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +19,8 @@ public class EditorDTO {
     private long editorview;
     private String thumbnailUrl;
     private String contentImgUrl;
+
+    private List<String> hashtags;
 
 
 

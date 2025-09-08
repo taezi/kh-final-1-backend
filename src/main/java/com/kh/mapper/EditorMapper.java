@@ -1,6 +1,7 @@
 package com.kh.mapper;
 
 import com.kh.dto.EditorDTO;
+import com.kh.dto.HashtagDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -31,4 +32,11 @@ public interface EditorMapper {
     // 조회수 증가
     int incrementView(long editorno);
 
+    int selectMaxEditorno();
+
+    Long findHashtagIdByName(String tagName);
+
+    int insertHashtag(HashtagDTO hashtag);
+
+    int insertEditorHashtag(Map<String, Long> map);
 }
