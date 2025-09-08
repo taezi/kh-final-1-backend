@@ -12,16 +12,25 @@
         R.CREATEDAT,
         R.CONTENTTYPE,
         R.CONTENTNO,
-        M.USERNAME AS USERNAME
-        FROM REVIEW R
+        M.USERNAME AS USERNAME,
+        F.REVIEWFILEURL AS photoUrl FROM REVIEW R
         JOIN MEMBER M ON R.USERNO = M.USERNO
-        WHERE R.CONTENTNO = #{contentNo}
+        LEFT JOIN REVIEW_FILE F ON R.REVIEWNO = F.REVIEWNO WHERE R.CONTENTNO = #{contentNo}
         ORDER BY R.CREATEDAT DESC
     </select>
 
-    <insert id="insertReview">
-        INSERT INTO REVIEW (USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO)
-        VALUES (#{userNo}, #{commentA}, SYSDATE, #{contentType}, #{contentNo})
+    <insert id="insertReview" parameterType="com.kh.dto.MovieReviewDTO">
+        <selectKey keyProperty="reviewNo" resultType="int" order="BEFORE">
+            SELECT review_seq.nextval FROM dual
+        </selectKey>
+
+        INSERT INTO REVIEW (REVIEWNO, USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO)
+        VALUES (#{reviewNo}, #{userNo}, #{commentA}, SYSDATE, #{contentType}, #{contentNo})
+    </insert>
+
+    <insert id="insertReviewFile">
+        INSERT INTO REVIEW_FILE (REVIEWFILENO, REVIEWNO, REVIEWFILEURL)
+        VALUES (review_file_seq.nextval, #{reviewNo}, #{photoUrl})
     </insert>
 
 
@@ -30,7 +39,6 @@
         UPDATE REVIEW
         SET
         COMMENTA = #{commentA}
-<!--        MODIFIEDAT = SYSDATE-->
         WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
     </update>
 
@@ -39,4 +47,8 @@
         WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
     </delete>
 
+    <delete id="deleteReviewFile">
+        DELETE FROM REVIEW_FILE
+        WHERE REVIEWNO = #{reviewNo}
+    </delete>
 </mapper>

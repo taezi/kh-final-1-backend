@@ -2,6 +2,8 @@ package com.kh.mapper;
 
 import com.kh.dto.MovieReviewDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 @Mapper
@@ -13,5 +15,10 @@ public interface MovieReviewMapper {
     void insertReview(MovieReviewDTO movieReview);
 
     int updateReview(MovieReviewDTO review);
-    void deleteReview(int reviewNo, int userNo);
+
+    void deleteReview(@Param("reviewNo") int reviewNo, @Param("userNo") int userNo);
+
+    void insertReviewFile(@Param("reviewNo") int reviewNo, @Param("photoUrl") String photoUrl);
+
+    void deleteReviewFile(int reviewNo);
 }
