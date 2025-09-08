@@ -20,6 +20,4 @@ public class EventDto {
     private String isFree;           // ISFREE (VARCHAR2(10) → 'Y'/'N' 등 문자열로 둠)
     private LocalDate startDate;     // STARTDATE (DATE)
     private LocalDate endDate;       // ENDDATE (DATE)
-
-
 }
