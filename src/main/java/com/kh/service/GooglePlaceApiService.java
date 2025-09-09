@@ -9,9 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Cafe Places API를 사용하여 카페 정보를 조회하고 DTO로 변환하는 서비스입니다.
@@ -206,4 +211,93 @@ public class GooglePlaceApiService {
                     }
                 });
     }
+
+
+    // 필요 import
+
+
+// ... 기존 클래스 내부
+
+    /** 괄호 설명 제거 유틸: "…(도보 15분)" 같은 것 제거 */
+    private String stripParen(String s) {
+        if (s == null) return "";
+        return s.replaceAll("\\s*[\\(\\[（【〔].*?[\\)\\]）】〕]\\s*", " ").trim();
+    }
+
+    private String enc(String s) {
+        return UriUtils.encode(s == null ? "" : s, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 여러 장소 쿼리로 Directions 임베드 URL 생성 (도보).
+     * - 각 쿼리로 place_id 찾기 → 성공 시 "place_id:XXXX" 사용
+     * - 실패 시 원문 텍스트 그대로 사용(주소/장소명)
+     */
+    // 여러 주소(또는 장소명) → place_id → directions 임베드 URL 생성
+    public Mono<String> buildDirectionsEmbedUrlByQueries(List<String> queries) {
+        if (queries == null || queries.size() < 2) {
+            return Mono.error(new IllegalArgumentException("최소 두 개의 주소가 필요합니다."));
+        }
+
+        return Flux.fromIterable(queries)
+                // 순서를 유지하려고 concatMap 사용 (A→B→C…)
+                .concatMap(this::findPlaceId)
+                .collectList()
+                .map(placeIds -> {
+                    if (placeIds.size() < 2) {
+                        throw new IllegalStateException("유효한 장소가 2개 미만입니다.");
+                    }
+
+                    String origin = "place_id:" + placeIds.get(0);
+                    String destination = "place_id:" + placeIds.get(placeIds.size() - 1);
+
+                    String waypoints = null;
+                    if (placeIds.size() > 2) {
+                        waypoints = placeIds.subList(1, placeIds.size() - 1).stream()
+                                .map(id -> "place_id:" + id)
+                                .collect(Collectors.joining("|"));
+                    }
+
+                    UriComponentsBuilder b = UriComponentsBuilder
+                            .fromHttpUrl("https://www.google.com/maps/embed/v1/directions")
+                            .queryParam("key", googlePlacesApiKey)
+                            .queryParam("origin", origin)
+                            .queryParam("destination", destination)
+                            .queryParam("mode", "walking"); // 도보
+
+                    if (waypoints != null && !waypoints.isEmpty()) {
+                        b.queryParam("waypoints", waypoints);
+                    }
+                    return b.toUriString();
+                });
+    }
+
+
+    /** 실제 임베드 URL 조립 */
+    private String buildDirectionsEmbedUrlFromTokens(java.util.List<String> tokens) {
+        if (tokens.size() < 2) {
+            throw new IllegalArgumentException("유효한 주소/장소가 2개 이상 필요합니다.");
+        }
+
+        // origin / destination
+        String origin = enc(tokens.get(0));
+        String destination = enc(tokens.get(tokens.size() - 1));
+
+        // waypoints (중간 경유지)
+        String waypoints = "";
+        if (tokens.size() > 2) {
+            java.util.List<String> mids = tokens.subList(1, tokens.size() - 1);
+            waypoints = "&waypoints=" + enc(String.join("|", mids));
+        }
+
+        // Google Maps Embed API (Directions)
+        return "https://www.google.com/maps/embed/v1/directions"
+                + "?key=" + googlePlacesApiKey     // ✅ 이미 서비스에 키 주입됨
+                + "&origin=" + origin
+                + "&destination=" + destination
+                + waypoints
+                + "&mode=walking&language=ko&region=KR";
+    }
+
+
 }

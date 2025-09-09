@@ -54,7 +54,7 @@ public class SecurityConfig {
                         "/api/views/**").permitAll()
                         // 2. 인증이 필요한 POST 요청을 구체적으로 명시
                         .requestMatchers(HttpMethod.POST, "/api/movie/review/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**","/api/manage/find-pwd").permitAll() // 로그인/회원가입 등
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**","/api/manage/find-pwd","/api/maps/**").permitAll() // 로그인/회원가입 등
 
                         // 3. 특정 역할이 필요한 규칙 (관리자, 에디터)
 
