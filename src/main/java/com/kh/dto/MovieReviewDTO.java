@@ -17,5 +17,4 @@ public class MovieReviewDTO {
     private String createDat;
     private String contentType; // 콘텐츠 타입
     private int contentNo; // 콘텐츠 고유 번호
-    private String photoUrl;
 }

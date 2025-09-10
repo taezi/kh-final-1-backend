@@ -18,7 +18,5 @@ public interface MovieReviewMapper {
 
     void deleteReview(@Param("reviewNo") int reviewNo, @Param("userNo") int userNo);
 
-    void insertReviewFile(@Param("reviewNo") int reviewNo, @Param("photoUrl") String photoUrl);
-
-    void deleteReviewFile(int reviewNo);
+    int getNextReviewNo();
 }
