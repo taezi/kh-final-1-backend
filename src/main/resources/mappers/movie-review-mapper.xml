@@ -19,18 +19,19 @@
         ORDER BY R.CREATEDAT DESC
     </select>
 
-    <insert id="insertReview">
-        INSERT INTO REVIEW (USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO)
-        VALUES (#{userNo}, #{commentA}, SYSDATE, #{contentType}, #{contentNo})
+    <select id="getNextReviewNo" resultType="int">
+        SELECT review_seq.nextval FROM dual
+    </select>
+
+    <insert id="insertReview" parameterType="com.kh.dto.MovieReviewDTO">
+        INSERT INTO REVIEW (REVIEWNO, USERNO, COMMENTA, CREATEDAT, CONTENTTYPE, CONTENTNO)
+        VALUES (#{reviewNo}, #{userNo}, #{commentA}, SYSDATE, #{contentType}, #{contentNo})
     </insert>
-
-
 
     <update id="updateReview">
         UPDATE REVIEW
         SET
         COMMENTA = #{commentA}
-<!--        MODIFIEDAT = SYSDATE-->
         WHERE REVIEWNO = #{reviewNo} AND USERNO = #{userNo}
     </update>
 
