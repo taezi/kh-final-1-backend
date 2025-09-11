@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kh.mapper.ManageMapper">
+
+    <delete id="deleteUser">
+        delete from member where userid = #{userid}
+    </delete>
+
+    <update id="updateUserid">
+        update member set userid = #{afterUserid} where userid = #{beforeUserid}
+    </update>
+
+    <update id="updateUsername">
+        update member set username = #{afterUsername} where userid = #{userid}
+    </update>
+
+    <update id="updateNickname">
+        update member set nickname = #{afterNickname} where userid = #{userid}
+    </update>
+
+    <update id="updateEmail">
+        update member set email= #{afterEmail} where userid = #{userid}
+    </update>
+
+    <update id="updatePassword">
+        update member set password= #{encodedAfterPassword} where userid = #{userid}
+    </update>
+
+    <insert id="insertInquiry">
+        insert into inquiry(userno, inquirytitle, inquirycontent, phonenumber)
+        values(#{userno}, #{inquiryTitle}, #{inquiryContent}, #{phoneNumber})
+    </insert>
+
+    <select id="getInquiriesByUser" resultType="inquiry">
+        SELECT inquiryno, userno, phonenumber, inquirytitle, inquirycontent,
+        createdat, replycontent, repliedat, status
+        FROM inquiry
+        WHERE userno = #{userno}
+        ORDER BY createdat DESC
+    </select>
+
+    <select id="getInquiryDetail" resultType="inquiry">
+        select * from inquiry where inquiryno = #{inquiryno}
+    </select>
+
+
+    <select id="getInquiriesList" resultType="inquiry">
+        select * from inquiry
+    </select>
+
+    <update id="insertReply">
+        update inquiry set
+        replycontent = #{replyContent , jdbcType=VARCHAR},
+        repliedat = sysdate,
+        status = 'replied'
+        where inquiryno = #{inquiryno , jdbcType=NUMERIC}
+    </update>
+
+
+
+
+</mapper>

@@ -25,7 +25,7 @@ public class AiService {
     public String generateText(String prompt) {
         try {
             GenerateContentResponse response = client.models.generateContent(
-                    "gemini-2.5-flash",
+                    "gemini-1.5-pro",
                     prompt,
                     null
             );

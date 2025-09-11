@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.mapper.NoticeMapper">
+
+    <!-- 공지글 등록 -->
+    <insert id="insertNotice" parameterType="com.kh.dto.NoticeDTO">
+        INSERT INTO NOTICE (userno, noticetitle, noticepost)
+        VALUES (#{userno}, #{noticetitle}, #{noticepost})
+    </insert>
+
+    <!-- 공지글 전체 조회 (페이징: offset/limit) -->
+    <select id="selectNoticeAll" resultType="com.kh.dto.NoticeDTO">
+        SELECT
+        noticeno,
+        noticetitle,
+        noticepost,
+        noticedate,
+        noticeview,
+        userno
+        FROM NOTICE
+        ORDER BY noticeno DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <select id="countNotice" resultType="long">
+        SELECT COUNT(*) FROM NOTICE
+    </select>
+
+    <select id="selectNoticeById" parameterType="long" resultType="com.kh.dto.NoticeDTO">
+        SELECT *
+        FROM NOTICE
+        WHERE noticeno = #{noticeno}
+    </select>
+
+    <update id="updateNotice" parameterType="com.kh.dto.NoticeDTO">
+        UPDATE NOTICE
+        SET
+        noticetitle = #{noticetitle},
+        noticepost = #{noticepost},
+        noticeupdatedate = SYSDATE
+        WHERE noticeno = #{noticeno}
+    </update>
+
+    <delete id="deleteNotice" parameterType="long">
+        DELETE FROM NOTICE
+        WHERE noticeno = #{noticeno}
+    </delete>
+
+    <update id="incrementView" parameterType="long">
+        UPDATE NOTICE
+        SET noticeview = noticeview + 1
+        WHERE noticeno = #{noticeno}
+    </update>
+
+</mapper>

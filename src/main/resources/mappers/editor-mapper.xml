@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kh.mapper.EditorMapper">
+
+    <resultMap id="editorResultMap" type="com.kh.dto.EditorDTO">
+        <id property="editorno" column="editorno"/>
+        <result property="userno" column="userno"/>
+        <result property="editortitle" column="editortitle"/>
+        <result property="editorcontent" column="editorcontent"/>
+        <result property="thumbnailUrl" column="thumbnailurl"/>
+        <result property="contentImgUrl" column="contentimgurl"/>
+        <result property="editordate" column="editordate"/>
+        <result property="editorupdatedate" column="editorupdatedate"/>
+        <result property="editorview" column="editorview"/>
+        <collection property="hashtags" ofType="string">
+            <result column="tagname"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insertEditor">
+        INSERT INTO EDITOR_TABLE (userno, editortitle, editorcontent, thumbnailurl, contentimgurl)
+        VALUES (#{userno}, #{editortitle}, #{editorcontent}, #{thumbnailUrl}, #{contentImgUrl})
+    </insert>
+
+    <select id="selectEditorAll" resultMap="editorResultMap">
+        SELECT *
+        FROM editor_with_hashtags
+        ORDER BY editorno DESC
+    </select>
+
+
+    <select id="selectEditorById" resultMap="editorResultMap">
+        SELECT *
+        FROM editor_with_hashtags
+        WHERE editorno = #{editorno}
+    </select>
+
+    <update id="updateEditor" parameterType="com.kh.dto.EditorDTO">
+        UPDATE EDITOR_TABLE
+        SET editortitle = #{editortitle},
+        editorcontent = #{editorcontent},
+        thumbnailurl = #{thumbnailUrl},
+        contentimgurl = #{contentImgUrl},
+        editorupdatedate = sysdate
+        WHERE editorno = #{editorno}
+
+    </update>
+
+    <delete id="deleteEditor" parameterType="long">
+        DELETE FROM EDITOR_TABLE
+        WHERE editorno = #{editorno}
+    </delete>
+
+    <!-- 검색  -->
+    <select id="findEditors" resultMap="editorResultMap" parameterType="map">
+        SELECT *
+        FROM editor_with_hashtags
+        WHERE editortitle LIKE '%' || #{search} || '%'
+        OR tagname LIKE '%' || #{search} || '%'
+        ORDER BY editorno DESC
+    </select>
+
+
+    <!--  조회수 증가 -->
+    <update id="incrementView" parameterType="long">
+        UPDATE EDITOR_TABLE
+        SET editorview = editorview + 1
+        WHERE editorno = #{editorno}
+    </update>
+
+    <select id="selectMaxEditorno" parameterType="int">
+        SELECT MAX(editorno)
+        FROM EDITOR_TABLE
+    </select>
+
+    <!-- 해시태그 id 조회 -->
+    <select id="findHashtagIdByName" resultType="long">
+        SELECT hashtagid
+        FROM hashtag
+        WHERE tagname = #{tagname}
+    </select>
+
+    <!-- 해시태그 추가 -->
+    <insert id="insertHashtag" parameterType="com.kh.dto.HashtagDTO">
+        <selectKey keyProperty="hashtagid" resultType="long" order="BEFORE">
+            SELECT SEQ_hashtag.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO hashtag (hashtagid, tagname)
+        VALUES (#{hashtagid}, #{tagname})
+    </insert>
+
+    <!-- editor_hashtag 매핑 추가 -->
+    <insert id="insertEditorHashtag">
+        INSERT INTO editor_hashtag (editorno, hashtagid)
+        VALUES (#{editorno}, #{hashtagid})
+    </insert>
+
+    <!-- 특정 게시글의 해시태그 매핑 삭제 -->
+    <delete id="deleteEditorHashtags" parameterType="long">
+        DELETE FROM editor_hashtag WHERE editorno = #{editorno}
+    </delete>
+
+
+
+</mapper>

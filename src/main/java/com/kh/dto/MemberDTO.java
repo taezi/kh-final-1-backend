@@ -19,5 +19,5 @@ public class MemberDTO {
     private String nickname;
     private String joindate;
     private String role;
-    //12
+    //1
 }
